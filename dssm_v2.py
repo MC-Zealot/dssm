@@ -40,8 +40,10 @@ L2_N = 120
 
 # 读取数据
 train_size, test_size = 1000000, 100000
-data_path = 'D:\data\dssm/hy_test.csv'
-data_sets = data_input.get_search_data(data_path, train_size, test_size)
+data_path = 'data/hy_test.csv'
+data_path_vivo = 'data/oppo_round1_train_20180929.txt'
+# data_sets = data_input.get_search_data(data_path, train_size, test_size)
+data_sets = data_input.get_data(data_path_vivo, train_size, test_size)
 
 
 def mean_var_with_update(ema, fc_mean, fc_var):
@@ -63,10 +65,8 @@ def batch_normalization(x, phase_train, out_size):
         normed:      batch-normalized maps
     """
     with tf.variable_scope('bn'):
-        beta = tf.Variable(tf.constant(0.0, shape=[out_size]),
-                           name='beta', trainable=True)
-        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]),
-                            name='gamma', trainable=True)
+        beta = tf.Variable(tf.constant(0.0, shape=[out_size]), name='beta', trainable=True)
+        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]), name='gamma', trainable=True)
         batch_mean, batch_var = tf.nn.moments(x, [0], name='moments')
         ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
