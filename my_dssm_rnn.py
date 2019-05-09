@@ -3,10 +3,7 @@
 python=3.5
 TensorFlow=1.2.1
 """
-import pandas as pd
 from scipy import sparse
-import collections
-from numpy import random,mat
 import random
 import time
 import numpy as np
@@ -46,15 +43,10 @@ conf = Config()
 data_train = data_input.get_data(conf.file_train)
 print ("data_train['query'] len: ", len(data_train['query']),", data: ", data_train['query'])
 data_vali = data_input.get_data(conf.file_vali)
+print ("data_vali['query'] len: ", len(data_vali['query']),", data: ", data_vali['query'])
 # print(len(data_train['query']), query_BS, len(data_train['query']) / query_BS)
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
-
-
-def mean_var_with_update(ema, fc_mean, fc_var):
-    ema_apply_op = ema.apply([fc_mean, fc_var])
-    with tf.control_dependencies([ema_apply_op]):
-        return tf.identity(fc_mean), tf.identity(fc_var)
 
 
 def batch_normalization(x, phase_train, out_size):
@@ -135,6 +127,7 @@ with tf.name_scope('BN1'):
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
+
 
 
 with tf.name_scope('FC2'):
@@ -253,26 +246,18 @@ def pull_batch(data_map, batch_id):
 
     query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
     # return query_in, doc_positive_in, doc_negative_in, query_len, doc_positive_len, doc_negative_len
-    print ("query_in shape: ",np.array(query_in).shape)
-    print ("doc_positive_in shape: ",np.array(doc_positive_in).shape)
-    print ("doc_negative_in shape: ",np.array(doc_negative_in).shape)
+    # print ("query_in shape: ",np.array(query_in).shape)
+    # print ("doc_positive_in shape: ",np.array(doc_positive_in).shape)
+    # print ("doc_negative_in shape: ",np.array(doc_negative_in).shape)
     return query_in, doc_positive_in, doc_negative_in
 
 
-# def feed_dict(on_training, batch_id, drop_prob):
-#     query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
-#                                                                                                      batch_id)
-#     query_len = len(query_in)
-#     query_seq_len = [conf.max_seq_len] * query_len
-#     pos_seq_len = [conf.max_seq_len] * query_len
-#     neg_seq_len = [conf.max_seq_len] * query_len * NEG
-#     return {query_batch: query_in,
-#                     doc_positive_batch: doc_positive_in,
-#                     doc_negative_batch: doc_negative_in,
-#                     on_train: on_training}
-def feed_dict(on_training,batch_id, drop_out_prob):
-    # batch_id = int(random.random() * (FLAGS.epoch_steps - 1))
-    query_in, doc_positive_in, doc_negative_in = pull_batch(data_train, batch_id)
+def feed_dict(on_training,Train,batch_id, drop_out_prob):
+    if Train:
+        # batch_id = int(random.random() * (FLAGS.epoch_steps - 1))
+        query_in, doc_positive_in, doc_negative_in = pull_batch(data_train, batch_id)
+    else:
+        query_in, doc_positive_in, doc_negative_in = pull_batch(data_vali, batch_id)
     drop_out_prob = 1.0
     return {query_batch: query_in,
             doc_positive_batch: doc_positive_in,
@@ -296,13 +281,17 @@ with tf.Session() as sess:
         batch_ids = [i for i in range(train_epoch_steps)]
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
-            print("batch_id:", batch_id)
-            sess.run(train_step, feed_dict=feed_dict(True, batch_id, 0.5))
+            print("train batch_id:", batch_id)
+            # sess.run(train_step, feed_dict=feed_dict(True, batch_id, 0.5))
+            sess.run(train_step, feed_dict=feed_dict(True,True, batch_id, 0.5))
+            # sess.run(train_step, feed_dict=feed_dict(True, True, batch_id % FLAGS.pack_size, 0.5))
         end = time.time()
         # train loss
         epoch_loss = 0
         for i in range(train_epoch_steps):
-            loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
+            # loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
+            print("train 2 batch_id:", batch_id)
+            loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i, 1))
             epoch_loss += loss_v
 
         epoch_loss /= (train_epoch_steps)
@@ -315,7 +304,9 @@ with tf.Session() as sess:
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
+            # loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
+            print("test batch_id:", batch_id)
+            loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i, 1))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})

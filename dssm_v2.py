@@ -117,7 +117,6 @@ with tf.name_scope('BN1'):
     doc_l1 = batch_normalization(tf.concat([doc_positive_l1, doc_negative_l1], axis=0), on_train, L1_N)
     doc_positive_l1 = tf.slice(doc_l1, [0, 0], [query_BS, -1])
     doc_negative_l1 = tf.slice(doc_l1, [query_BS, 0], [-1, -1])
-
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)

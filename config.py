@@ -19,7 +19,7 @@ class Config(object):
     unk = '[UNK]'
     pad = '[PAD]'
     vocab_path = './data/vocab.txt'
-    file_train = './data/oppo_round1_train_20180929_mini_test.txt'
+    file_train = './data/oppo_round1_train_20180929_mini.txt'
     # file_train = './data/oppo_round1_train_20180929.txt'
     file_vali = './data/oppo_round1_vali_20180929_mini.txt'
     # file_vali = './data/oppo_round1_vali_20180929.txt'
@@ -28,7 +28,7 @@ class Config(object):
     use_stack_rnn = False
     learning_rate = 0.01
     # max_steps = 8000
-    num_epoch = 100
+    num_epoch = 50
     summaries_dir = './Summaries/'
     gpu = 0
 
