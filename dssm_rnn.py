@@ -304,7 +304,7 @@ with tf.Session() as sess:
         batch_ids = [i for i in range(train_epoch_steps)]
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
-            print(batch_id)
+            # print(batch_id)
             sess.run(train_step, feed_dict=feed_dict(True, batch_id, 0.5))
         end = time.time()
         # train loss

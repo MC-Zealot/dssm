@@ -12,7 +12,6 @@ import time
 import numpy as np
 import tensorflow as tf
 import data_input
-from config import Config
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -41,24 +40,9 @@ L2_N = 120
 
 # 读取数据
 train_size, test_size = 1000000, 100000
-conf = Config()
-data_train = data_input.get_data(conf.file_train)
-data_vali = data_input.get_data(conf.file_vali)
-# data_sets = data_input.get_search_data(data_path, train_size, test_size)
-# data_sets = data_input.get_data(conf.file_train, train_size, test_size)
-data_sets_train = data_input.get_data(conf.file_train)
-data_sets_test = data_input.get_data(conf.file_vali)
+data_path = 'D:\data\dssm/hy_test.csv'
+data_sets = data_input.get_search_data(data_path, train_size, test_size)
 
-def pull_batch(data_map, batch_id):
-    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    query_len = data_map['query_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_positive_len = data_map['doc_pos_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
-    doc_negative_len = data_map['doc_neg_len'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
-
-    # query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
-    return query_in, doc_positive_in, doc_negative_in, query_len, doc_positive_len, doc_negative_len
 
 def mean_var_with_update(ema, fc_mean, fc_var):
     ema_apply_op = ema.apply([fc_mean, fc_var])
@@ -79,8 +63,10 @@ def batch_normalization(x, phase_train, out_size):
         normed:      batch-normalized maps
     """
     with tf.variable_scope('bn'):
-        beta = tf.Variable(tf.constant(0.0, shape=[out_size]), name='beta', trainable=True)
-        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]), name='gamma', trainable=True)
+        beta = tf.Variable(tf.constant(0.0, shape=[out_size]),
+                           name='beta', trainable=True)
+        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]),
+                            name='gamma', trainable=True)
         batch_mean, batch_var = tf.nn.moments(x, [0], name='moments')
         ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
@@ -254,10 +240,13 @@ def pull_batch(query_data, doc_positive, doc_negative, batch_id):
 def feed_dict(on_training, Train, batch_id, drop_out_prob):
     if Train:
         batch_id = int(random.random() * (FLAGS.epoch_steps - 1))
-        query_in, doc_positive_in, doc_negative_in = pull_batch(data_sets_test, batch_id)
+        query_in, doc_positive_in, doc_negative_in = pull_batch(data_sets.query_train_data,
+                                                                data_sets.doc_train_positive,
+                                                                data_sets.doc_train_negative, batch_id)
     else:
         drop_out_prob = 1.0
-        query_in, doc_positive_in, doc_negative_in = pull_batch(data_sets_test, batch_id)
+        query_in, doc_positive_in, doc_negative_in = pull_batch(data_sets.query_test_data, data_sets.doc_test_positive,
+                                                                data_sets.doc_test_negative, batch_id)
     return {query_batch: query_in, doc_positive_batch: doc_positive_in, doc_negative_batch: doc_negative_in,
             on_train: on_training}
 

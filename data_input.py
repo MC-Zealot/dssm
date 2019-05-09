@@ -31,13 +31,19 @@ def gen_word_set(file_path, out_path='./data/words.txt'):
 
 
 def convert_word2id(query, vocab_map):
+    """
+    从生成好的字典里找到字的id
+    :param query:
+    :param vocab_map:
+    :return:
+    """
     ids = []
     for w in query:
         if w in vocab_map:
             ids.append(vocab_map[w])
         else:
             ids.append(vocab_map[conf.unk])
-    while len(ids) < conf.max_seq_len:
+    while len(ids) < conf.max_seq_len: #如果query少于max_seq_len，则填充0，满足长度
         ids.append(vocab_map[conf.pad])
     return ids[:conf.max_seq_len]
 
@@ -60,7 +66,7 @@ def get_data(file_path):
             cur_arr, cur_len = [], []
             query_pred = json.loads(query_pred)
             # only 4 negative sample
-            for each in query_pred:
+            for each in query_pred: #从预测的query中，找4个负例
                 if each == title:
                     continue
                 cur_arr.append(convert_word2id(each, conf.vocab_map))

@@ -3,13 +3,28 @@
 python=3.5
 TensorFlow=1.2.1
 """
-
+import pandas as pd
+from scipy import sparse
+import collections
+from numpy import random,mat
 import random
 import time
 import numpy as np
 import tensorflow as tf
 import data_input
 from config import Config
+
+flags = tf.app.flags
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string('summaries_dir', 'Summaries', 'Summaries directory')
+flags.DEFINE_float('learning_rate', 0.1, 'Initial learning rate.')
+flags.DEFINE_integer('max_steps', 80000, 'Number of steps to run trainer.')
+flags.DEFINE_integer('epoch_steps', 2000, "Number of steps in one epoch.")
+flags.DEFINE_integer('pack_size', 2000, "Number of batches in one pickle pack.")
+flags.DEFINE_integer('test_pack_size', 200, "Number of batches in one pickle pack.")
+flags.DEFINE_bool('gpu', 0, "Enable GPU or not")
+
 
 start = time.time()
 # 是否加BN层
@@ -29,22 +44,11 @@ L2_N = 120
 # 读取数据
 conf = Config()
 data_train = data_input.get_data(conf.file_train)
+print ("data_train['query'] len: ", len(data_train['query']),", data: ", data_train['query'])
 data_vali = data_input.get_data(conf.file_vali)
 # print(len(data_train['query']), query_BS, len(data_train['query']) / query_BS)
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
-
-
-def add_layer(inputs, in_size, out_size, activation_function=None):
-    wlimit = np.sqrt(6.0 / (in_size + out_size))
-    Weights = tf.Variable(tf.random_uniform([in_size, out_size], -wlimit, wlimit))
-    biases = tf.Variable(tf.random_uniform([out_size], -wlimit, wlimit))
-    Wx_plus_b = tf.matmul(inputs, Weights) + biases
-    if activation_function is None:
-        outputs = Wx_plus_b
-    else:
-        outputs = activation_function(Wx_plus_b)
-    return outputs
 
 
 def mean_var_with_update(ema, fc_mean, fc_var):
@@ -100,8 +104,8 @@ def variable_summaries(var, name):
 
 with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
-    # query_batch = tf.placeholder(tf.int32, shape=[None, None], name='query_batch')
-    query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='QueryBatch')
+    print ("TRIGRAM_D: ",TRIGRAM_D)
+    query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
     doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     query_seq_length = tf.placeholder(tf.int32, shape=[None], name='query_sequence_length')
@@ -132,17 +136,7 @@ with tf.name_scope('BN1'):
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
 
-# with tf.name_scope('Drop_out'):
-#     keep_prob = tf.placeholder("float")
-#     query_l1_out = tf.nn.dropout(query_l1_out, keep_prob)
-#     doc_positive_l1_out = tf.nn.dropout(doc_positive_l1_out, keep_prob)
-#     doc_negative_l1_out = tf.nn.dropout(doc_positive_l1_out, keep_prob)
 
-
-# with tf.name_scope('FC2'):
-#     query_l2 = add_layer(query_batch, L1_N, L2_N, activation_function=None)
-#     doc_positive_l2 = add_layer(doc_positive_batch, L1_N, L2_N, activation_function=None)
-#     doc_negative_l2 = add_layer(doc_negative_batch, L1_N, L2_N, activation_function=None)
 with tf.name_scope('FC2'):
     l2_par_range = np.sqrt(6.0 / (L1_N + L2_N))
 
@@ -157,17 +151,6 @@ with tf.name_scope('FC2'):
 
     query_l2 = batch_normalization(query_l2, on_train, L2_N)
 
-
-# with tf.name_scope('BN2'):
-#     query_l2 = batch_normalization(query_l2, on_train, L2_N)
-#     doc_l2 = batch_normalization(tf.concat([doc_positive_l2, doc_negative_l2], axis=0), on_train, L2_N)
-#     doc_positive_l2 = tf.slice(doc_l2, [0, 0], [query_BS, -1])
-#     doc_negative_l2 = tf.slice(doc_l2, [query_BS, 0], [-1, -1])
-#
-#     query_y = tf.nn.relu(query_l2)
-#     doc_positive_y = tf.nn.relu(doc_positive_l2)
-#     doc_negative_y = tf.nn.relu(doc_negative_l2)
-#     # query_y = tf.contrib.slim.batch_norm(query_l2, activation_fn=tf.nn.relu)
 
 with tf.name_scope('BN2'):
     doc_l2 = batch_normalization(tf.concat([doc_positive_l2, doc_negative_l2], axis=0), on_train, L2_N)
@@ -237,9 +220,13 @@ with tf.name_scope('Train'):
 
 
 def pull_all(query_in, doc_positive_in, doc_negative_in):
-    query_in = query_in.tocoo()
-    doc_positive_in = doc_positive_in.tocoo()
-    doc_negative_in = doc_negative_in.tocoo()
+    # query_in = np.array(query_in)
+    query_in = sparse.coo_matrix(query_in)
+    doc_positive_in = sparse.coo_matrix(doc_positive_in)
+    doc_negative_in = sparse.coo_matrix(doc_negative_in)
+    # query_in = query_in.tocoo()
+    # doc_positive_in = doc_positive_in.tocoo()
+    # doc_negative_in = doc_negative_in.tocoo()
     query_in = tf.SparseTensorValue(
         np.transpose([np.array(query_in.row, dtype=np.int64), np.array(query_in.col, dtype=np.int64)]),
         np.array(query_in.data, dtype=np.float),
@@ -257,28 +244,40 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
 
 
 def pull_batch(data_map, batch_id):
-    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    query_len = data_map['query_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_positive_len = data_map['doc_pos_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
-    doc_negative_len = data_map['doc_neg_len'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
+    query_in_tmp=np.mat(data_map['query'])
+    doc_positive_in_tmp=np.mat(data_map['doc_pos'])
+    doc_negative_in_tmp=np.mat(data_map['doc_neg'])
+    query_in = query_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
+    doc_positive_in = doc_positive_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
+    doc_negative_in = doc_negative_in_tmp[batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG, :]
 
-    # query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
-    return query_in, doc_positive_in, doc_negative_in, query_len, doc_positive_len, doc_negative_len
+    query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
+    # return query_in, doc_positive_in, doc_negative_in, query_len, doc_positive_len, doc_negative_len
+    print ("query_in shape: ",np.array(query_in).shape)
+    print ("doc_positive_in shape: ",np.array(doc_positive_in).shape)
+    print ("doc_negative_in shape: ",np.array(doc_negative_in).shape)
+    return query_in, doc_positive_in, doc_negative_in
 
 
-def feed_dict(on_training, batch_id, drop_prob):
-    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
-                                                                                                     batch_id)
-    query_len = len(query_in)
-    query_seq_len = [conf.max_seq_len] * query_len
-    pos_seq_len = [conf.max_seq_len] * query_len
-    neg_seq_len = [conf.max_seq_len] * query_len * NEG
-    return {query_batch: query_in, doc_positive_batch: doc_positive_in, doc_negative_batch: doc_negative_in,
-            on_train: on_training, drop_out_prob: drop_prob, query_seq_length: query_seq_len,
-            neg_seq_length: neg_seq_len, pos_seq_length: pos_seq_len}
-
+# def feed_dict(on_training, batch_id, drop_prob):
+#     query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
+#                                                                                                      batch_id)
+#     query_len = len(query_in)
+#     query_seq_len = [conf.max_seq_len] * query_len
+#     pos_seq_len = [conf.max_seq_len] * query_len
+#     neg_seq_len = [conf.max_seq_len] * query_len * NEG
+#     return {query_batch: query_in,
+#                     doc_positive_batch: doc_positive_in,
+#                     doc_negative_batch: doc_negative_in,
+#                     on_train: on_training}
+def feed_dict(on_training,batch_id, drop_out_prob):
+    # batch_id = int(random.random() * (FLAGS.epoch_steps - 1))
+    query_in, doc_positive_in, doc_negative_in = pull_batch(data_train, batch_id)
+    drop_out_prob = 1.0
+    return {query_batch: query_in,
+            doc_positive_batch: doc_positive_in,
+            doc_negative_batch: doc_negative_in,
+            on_train: on_training}
 
 # config = tf.ConfigProto()  # log_device_placement=True)
 # config.gpu_options.allow_growth = True
@@ -297,7 +296,7 @@ with tf.Session() as sess:
         batch_ids = [i for i in range(train_epoch_steps)]
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
-            print(batch_id)
+            print("batch_id:", batch_id)
             sess.run(train_step, feed_dict=feed_dict(True, batch_id, 0.5))
         end = time.time()
         # train loss
