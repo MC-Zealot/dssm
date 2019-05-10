@@ -24,11 +24,9 @@ flags.DEFINE_bool('gpu', 0, "Enable GPU or not")
 
 
 start = time.time()
-# 是否加BN层
-norm, epsilon = False, 0.001
 
-# TRIGRAM_D = 21128
-TRIGRAM_D = 100
+TRIGRAM_D = 21128
+# TRIGRAM_D = 100
 # negative sample
 NEG = 4
 # query batch size
@@ -216,13 +214,10 @@ with tf.name_scope('Train'):
 
 
 def pull_all(query_in, doc_positive_in, doc_negative_in):
-    # query_in = np.array(query_in)
     query_in = sparse.coo_matrix(query_in)
     doc_positive_in = sparse.coo_matrix(doc_positive_in)
     doc_negative_in = sparse.coo_matrix(doc_negative_in)
-    # query_in = query_in.tocoo()
-    # doc_positive_in = doc_positive_in.tocoo()
-    # doc_negative_in = doc_negative_in.tocoo()
+
     query_in = tf.SparseTensorValue(
         np.transpose([np.array(query_in.row, dtype=np.int64), np.array(query_in.col, dtype=np.int64)]),
         np.array(query_in.data, dtype=np.float),
@@ -248,10 +243,7 @@ def pull_batch(data_map, batch_id):
     doc_negative_in = doc_negative_in_tmp[batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG, :]
 
     query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
-    # return query_in, doc_positive_in, doc_negative_in, query_len, doc_positive_len, doc_negative_len
-    # print ("query_in shape: ",np.array(query_in).shape)
-    # print ("doc_positive_in shape: ",np.array(doc_positive_in).shape)
-    # print ("doc_negative_in shape: ",np.array(doc_negative_in).shape)
+
     return query_in, doc_positive_in, doc_negative_in
 
 
