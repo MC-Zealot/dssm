@@ -39,9 +39,11 @@ L2_N = 120
 # 读取数据
 conf = Config()
 data_train = data_input.get_data(conf.file_train)
-print ("data_train['query'] len: ", len(data_train['query']),", data: ", data_train['query'])
+# print ("data_train['query'] len: ", len(data_train['query']),", data: ", data_train['query'])
+print ("data_train['query'] len: ", len(data_train['query']))
 data_vali = data_input.get_data(conf.file_vali)
-print ("data_vali['query'] len: ", len(data_vali['query']),", data: ", data_vali['query'])
+# print ("data_vali['query'] len: ", len(data_vali['query']),", data: ", data_vali['query'])
+print ("data_vali['query'] len: ", len(data_vali['query']))
 # print(len(data_train['query']), query_BS, len(data_train['query']) / query_BS)
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
