@@ -170,11 +170,11 @@ with tf.name_scope('Cosine_Similarity'):
     # doc_norm = sqrt(sum(each x^2))
     doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True))
 
-    prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [NEG + 1, 1]), doc_y), 1, True)
-    norm_prod = tf.multiply(query_norm, doc_norm)
+    prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [NEG + 1, 1]), doc_y), 1, True)#分子
+    norm_prod = tf.multiply(query_norm, doc_norm)#分母
 
     # cos_sim_raw = query * doc / (||query|| * ||doc||)
-    cos_sim_raw = tf.truediv(prod, norm_prod)
+    cos_sim_raw = tf.truediv(prod, norm_prod)#除法
     # gamma = 20
     cos_sim = tf.transpose(tf.reshape(tf.transpose(cos_sim_raw), [NEG + 1, query_BS])) * 20
 

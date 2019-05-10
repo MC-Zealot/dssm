@@ -47,6 +47,8 @@ print ("data_vali['query'] len: ", len(data_vali['query']),", data: ", data_vali
 # print(len(data_train['query']), query_BS, len(data_train['query']) / query_BS)
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
+print ("train_epoch_steps: ", train_epoch_steps)
+print ("vali_epoch_steps: ", vali_epoch_steps)
 
 
 def batch_normalization(x, phase_train, out_size):
@@ -97,14 +99,15 @@ def variable_summaries(var, name):
 with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
     print ("TRIGRAM_D: ",TRIGRAM_D)
+    #定义数据结构，类型、shape
     query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
     doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
-    query_seq_length = tf.placeholder(tf.int32, shape=[None], name='query_sequence_length')
-    pos_seq_length = tf.placeholder(tf.int32, shape=[None], name='pos_seq_length')
-    neg_seq_length = tf.placeholder(tf.int32, shape=[None], name='neg_sequence_length')
     on_train = tf.placeholder(tf.bool)
-    drop_out_prob = tf.placeholder(tf.float32, name='drop_out_prob')
+    # drop_out_prob = tf.placeholder(tf.float32, name='drop_out_prob')
+    # query_seq_length = tf.placeholder(tf.int32, shape=[None], name='query_sequence_length')
+    # pos_seq_length = tf.placeholder(tf.int32, shape=[None], name='pos_seq_length')
+    # neg_seq_length = tf.placeholder(tf.int32, shape=[None], name='neg_sequence_length')
 
 
 with tf.name_scope('FC1'):
@@ -252,61 +255,58 @@ def pull_batch(data_map, batch_id):
     return query_in, doc_positive_in, doc_negative_in
 
 
-def feed_dict(on_training,Train,batch_id, drop_out_prob):
+def feed_dict(on_training, Train, batch_id):
+    """
+    和定义的输入的数据结构相对应，互相绑定
+    :param on_training:
+    :param Train:
+    :param batch_id:
+    :return:
+    """
     if Train:
         # batch_id = int(random.random() * (FLAGS.epoch_steps - 1))
         query_in, doc_positive_in, doc_negative_in = pull_batch(data_train, batch_id)
     else:
         query_in, doc_positive_in, doc_negative_in = pull_batch(data_vali, batch_id)
-    drop_out_prob = 1.0
     return {query_batch: query_in,
             doc_positive_batch: doc_positive_in,
             doc_negative_batch: doc_negative_in,
             on_train: on_training}
 
-# config = tf.ConfigProto()  # log_device_placement=True)
-# config.gpu_options.allow_growth = True
-# if not config.gpu:
-# config = tf.ConfigProto(device_count= {'GPU' : 0})
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
-# with tf.Session(config=config) as sess:
 with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.global_variables_initializer()) #变量声明
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
     start = time.time()
     for epoch in range(conf.num_epoch):
         batch_ids = [i for i in range(train_epoch_steps)]
+        print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
             print("train batch_id:", batch_id)
-            # sess.run(train_step, feed_dict=feed_dict(True, batch_id, 0.5))
-            sess.run(train_step, feed_dict=feed_dict(True,True, batch_id, 0.5))
-            # sess.run(train_step, feed_dict=feed_dict(True, True, batch_id % FLAGS.pack_size, 0.5))
+            sess.run(train_step, feed_dict=feed_dict(True,True, batch_id))#模型训练
         end = time.time()
-        # train loss
+        # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
         for i in range(train_epoch_steps):
-            # loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
-            print("train 2 batch_id:", batch_id)
-            loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i, 1))
+            print("train 2 batch_id:", batch_id,", i: ",i)
+            loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
             epoch_loss += loss_v
 
         epoch_loss /= (train_epoch_steps)
         train_loss = sess.run(train_loss_summary, feed_dict={train_average_loss: epoch_loss})
         train_writer.add_summary(train_loss, epoch + 1)
-        print("\nEpoch #%d | Train Loss: %-4.3f | PureTrainTime: %-3.3fs" %
-              (epoch, epoch_loss, end - start))
+        print("\nEpoch #%d | Train Loss: %-4.3f | PureTrainTime: %-3.3fs" % (epoch, epoch_loss, end - start))
 
         # test loss
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            # loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
             print("test batch_id:", batch_id)
-            loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i, 1))
+            loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
