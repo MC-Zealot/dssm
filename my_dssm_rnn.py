@@ -62,10 +62,8 @@ def batch_normalization(x, phase_train, out_size):
         normed:      batch-normalized maps
     """
     with tf.variable_scope('bn'):
-        beta = tf.Variable(tf.constant(0.0, shape=[out_size]),
-                           name='beta', trainable=True)
-        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]),
-                            name='gamma', trainable=True)
+        beta = tf.Variable(tf.constant(0.0, shape=[out_size]), name='beta', trainable=True)
+        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]), name='gamma', trainable=True)
         batch_mean, batch_var = tf.nn.moments(x, [0], name='moments')
         ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
@@ -297,7 +295,7 @@ with tf.Session() as sess:
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            print("test batch_id:", batch_id)
+            print("test batch_id:", batch_id,", i: ",i)
             loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
