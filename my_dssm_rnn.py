@@ -25,7 +25,7 @@ flags.DEFINE_bool('gpu', 0, "Enable GPU or not")
 
 start = time.time()
 
-TRIGRAM_D = 21128
+TRIGRAM_D = 6340
 # TRIGRAM_D = 100
 # negative sample
 NEG = 4
@@ -265,16 +265,16 @@ def feed_dict(on_training, Train, batch_id):
             doc_negative_batch: doc_negative_in,
             on_train: on_training}
 
-# config = tf.ConfigProto()  # log_device_placement=True)
-# config.gpu_options.allow_growth = True
-# if not config.gpu:
-# config = tf.ConfigProto(device_count= {'GPU' : 0})
+config = tf.ConfigProto()  # log_device_placement=True)
+config.gpu_options.allow_growth = True
+#if not config.gpu:
+config = tf.ConfigProto(device_count= {'GPU' : 0})
 
 
-config = tf.ConfigProto(device_count={"CPU": 20}, # limit to num_cpu_core CPU usage
-                inter_op_parallelism_threads=1,
-                intra_op_parallelism_threads=20,
-                log_device_placement=True)
+#config = tf.ConfigProto(device_count={"CPU": 20}, # limit to num_cpu_core CPU usage
+#                inter_op_parallelism_threads=10,
+#                intra_op_parallelism_threads=20,
+#                log_device_placement=True)
 
 
 # 创建一个Saver对象，选择性保存变量或者模型。
