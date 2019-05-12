@@ -2,6 +2,7 @@
 # encoding=utf-8
 import json
 from config import Config
+import numpy as np
 
 # 配置文件
 conf = Config()
@@ -79,6 +80,7 @@ def get_data(file_path):
                 data_map['doc_pos_len'].append(len(title) if len(title) < conf.max_seq_len else conf.max_seq_len)
                 data_map['doc_neg'].extend(cur_arr[:4])
                 data_map['doc_neg_len'].extend(cur_len[:4])
+            # print("query_in shape....: ", np.shape(data_map['query']))
             pass
     return data_map
 
