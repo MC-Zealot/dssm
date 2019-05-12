@@ -265,6 +265,17 @@ def feed_dict(on_training, Train, batch_id):
             doc_negative_batch: doc_negative_in,
             on_train: on_training}
 
+# config = tf.ConfigProto()  # log_device_placement=True)
+# config.gpu_options.allow_growth = True
+# if not config.gpu:
+# config = tf.ConfigProto(device_count= {'GPU' : 0})
+
+
+config = tf.ConfigProto(device_count={"CPU": 4}, # limit to num_cpu_core CPU usage
+                inter_op_parallelism_threads=1,
+                intra_op_parallelism_threads=1,
+                log_device_placement=True)
+
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
