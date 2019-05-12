@@ -279,7 +279,8 @@ config = tf.ConfigProto(device_count={"CPU": 4}, # limit to num_cpu_core CPU usa
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
-with tf.Session() as sess:
+with tf.Session(config=config) as sess:
+# with tf.Session() as sess:
     sess.run(tf.global_variables_initializer()) #变量声明
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
