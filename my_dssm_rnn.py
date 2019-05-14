@@ -103,10 +103,6 @@ with tf.name_scope('input'):
     doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool)
-    # drop_out_prob = tf.placeholder(tf.float32, name='drop_out_prob')
-    # query_seq_length = tf.placeholder(tf.int32, shape=[None], name='query_sequence_length')
-    # pos_seq_length = tf.placeholder(tf.int32, shape=[None], name='pos_seq_length')
-    # neg_seq_length = tf.placeholder(tf.int32, shape=[None], name='neg_sequence_length')
 
 
 with tf.name_scope('FC1'):
@@ -126,10 +122,10 @@ with tf.name_scope('BN1'):
     doc_l1 = batch_normalization(tf.concat([doc_positive_l1, doc_negative_l1], axis=0), on_train, L1_N)
     doc_positive_l1 = tf.slice(doc_l1, [0, 0], [query_BS, -1])
     doc_negative_l1 = tf.slice(doc_l1, [query_BS, 0], [-1, -1])
+
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
-
 
 
 with tf.name_scope('FC2'):
@@ -144,10 +140,9 @@ with tf.name_scope('FC2'):
     doc_positive_l2 = tf.matmul(doc_positive_l1_out, weight2) + bias2
     doc_negative_l2 = tf.matmul(doc_negative_l1_out, weight2) + bias2
 
-    query_l2 = batch_normalization(query_l2, on_train, L2_N)
-
 
 with tf.name_scope('BN2'):
+    query_l2 = batch_normalization(query_l2, on_train, L2_N)
     doc_l2 = batch_normalization(tf.concat([doc_positive_l2, doc_negative_l2], axis=0), on_train, L2_N)
     doc_positive_l2 = tf.slice(doc_l2, [0, 0], [query_BS, -1])
     doc_negative_l2 = tf.slice(doc_l2, [query_BS, 0], [-1, -1])
@@ -155,28 +150,31 @@ with tf.name_scope('BN2'):
     query_y = tf.nn.relu(query_l2)
     doc_positive_y = tf.nn.relu(doc_positive_l2)
     doc_negative_y = tf.nn.relu(doc_negative_l2)
-    # query_y = tf.contrib.slim.batch_norm(query_l2, activation_fn=tf.nn.relu)
 
 with tf.name_scope('Merge_Negative_Doc'):
-    # 合并负样本，tile可选择是否扩展负样本。
+    #获取正样本
     doc_y = tf.tile(doc_positive_y, [1, 1])
-    # doc_y = tf.tile(doc_pos_rnn_output, [1, 1])
 
+    # 在正样本上合并负样本，tile可选择是否扩展负样本。
     for i in range(NEG):
+        print ("i: ",i)
         for j in range(query_BS):
             # slice(input_, begin, size)切片API
-            doc_y = tf.concat([doc_y, tf.slice(doc_negative_y, [j * NEG + i, 0], [1, -1])], 0)
-            # doc_y = tf.concat([doc_y, tf.slice(doc_neg_rnn_output, [j * NEG + i, 0], [1, -1])], 0)
+            doc_y = tf.concat(
+                [doc_y, tf.slice(
+                    doc_negative_y,
+                    [j * NEG + i, 0],
+                    [1, -1] #If `size[i]` is -1, all remaining elements in dimension i are included in the slice
+                )],
+                0)
 
 with tf.name_scope('Cosine_Similarity'):
     # Cosine similarity
     # query_norm = sqrt(sum(each x^2))
-    # query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_rnn_output), 1, True)), [NEG + 1, 1])
-    query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True)), [NEG + 1, 1])
+    query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True)), [NEG + 1, 1]) #包括了query的embedding
     # doc_norm = sqrt(sum(each x^2))
-    doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True))
+    doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True))  #doc_y  shape: (500,120)，包括了正例的embedding
 
-    # prod = tf.reduce_sum(tf.multiply(tf.tile(query_rnn_output, [NEG + 1, 1]), doc_y), 1, True)
     prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [NEG + 1, 1]), doc_y), 1, True)
     norm_prod = tf.multiply(query_norm, doc_norm)
 
@@ -198,10 +196,10 @@ with tf.name_scope('Training'):
     # Optimizer
     train_step = tf.train.AdamOptimizer(conf.learning_rate).minimize(loss)
 
-# with tf.name_scope('Accuracy'):
-#     correct_prediction = tf.equal(tf.argmax(prob, 1), 0)
-#     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-#     tf.summary.scalar('accuracy', accuracy)
+with tf.name_scope('Accuracy'):
+    correct_prediction = tf.equal(tf.argmax(prob, 1), 0)
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
 
 merged = tf.summary.merge_all()
 
