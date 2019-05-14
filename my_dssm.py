@@ -25,8 +25,8 @@ flags.DEFINE_bool('gpu', 0, "Enable GPU or not")
 
 start = time.time()
 
-TRIGRAM_D = 21128
-TRIGRAM_D = 6231
+# TRIGRAM_D = 21128
+
 # TRIGRAM_D = 100
 # negative sample
 NEG = 4
@@ -39,6 +39,7 @@ L2_N = 120
 
 # 读取数据
 conf = Config()
+TRIGRAM_D = conf.max_seq_len
 data_train = data_input.get_data(conf.file_train)
 print ("data_train['query'] len: ", len(data_train['query']))
 data_vali = data_input.get_data(conf.file_vali)
@@ -264,7 +265,7 @@ def feed_dict(on_training, Train, batch_id):
 config = tf.ConfigProto()  # log_device_placement=True)
 config.gpu_options.allow_growth = True
 #if not config.gpu:
-config = tf.ConfigProto(device_count= {'GPU' : 0})
+# config = tf.ConfigProto(device_count= {'GPU' : 0})
 
 
 #config = tf.ConfigProto(device_count={"CPU": 20}, # limit to num_cpu_core CPU usage

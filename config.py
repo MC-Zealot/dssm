@@ -19,17 +19,17 @@ class Config(object):
     unk = '[UNK]'
     pad = '[PAD]'
     vocab_path = './data/vocab.txt'
-    #file_train = './data/oppo_round1_train_20180929_mini.txt'
-    file_train = './data/oppo_round1_train_20180929.txt'
-    #file_vali = './data/oppo_round1_vali_20180929_mini.txt'
-    file_vali = './data/oppo_round1_vali_20180929.txt'
+    file_train = './data/oppo_round1_train_20180929_mini.txt'
+    # file_train = './data/oppo_round1_train_20180929.txt'
+    file_vali = './data/oppo_round1_vali_20180929_mini.txt'
+    # file_vali = './data/oppo_round1_vali_20180929.txt'
     # max_seq_len = 21128
-    max_seq_len = 10
+    max_seq_len = 6231
     hidden_size_rnn = 100
     use_stack_rnn = False
     learning_rate = 0.001
     # max_steps = 8000
-    num_epoch = 30
+    num_epoch = 40
     summaries_dir = './Summaries/'
     gpu = 0
 
