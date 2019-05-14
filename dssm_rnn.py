@@ -298,15 +298,18 @@ def feed_dict_vali(on_training, batch_id, drop_prob):
             on_train: on_training, drop_out_prob: drop_prob, query_seq_length: query_seq_len,
             neg_seq_length: neg_seq_len, pos_seq_length: pos_seq_len}
 
-# config = tf.ConfigProto()  # log_device_placement=True)
-# config.gpu_options.allow_growth = True
-# if not config.gpu:
-# config = tf.ConfigProto(device_count= {'GPU' : 0})
+config = tf.ConfigProto()  
+config.log_device_placement=True
+config.gpu_options.allow_growth = True
+#if not config.gpu:
+#config = tf.ConfigProto(device_count= {'GPU' : 0})
+#config.log_device_placement=True
+#config.gpu_options.allow_growth = True
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
-# with tf.Session(config=config) as sess:
-with tf.Session() as sess:
+with tf.Session(config=config) as sess:
+#with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
