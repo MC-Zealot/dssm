@@ -8,3 +8,5 @@ model/
 
 # 通用
 envi/
+*.log
+*.pyc

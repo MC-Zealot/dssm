@@ -265,6 +265,7 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
 
 def pull_batch(data_map, batch_id):
     query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
+    # print ("query_in shape....: ",np.shape(query_in))
     query_len = data_map['query_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
     doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
     doc_positive_len = data_map['doc_pos_len'][batch_id * query_BS:(batch_id + 1) * query_BS]
@@ -276,7 +277,7 @@ def pull_batch(data_map, batch_id):
 
 
 def feed_dict(on_training, batch_id, drop_prob):
-    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
+    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_train,
                                                                                                      batch_id)
     query_len = len(query_in)
     query_seq_len = [conf.max_seq_len] * query_len
@@ -286,6 +287,16 @@ def feed_dict(on_training, batch_id, drop_prob):
             on_train: on_training, drop_out_prob: drop_prob, query_seq_length: query_seq_len,
             neg_seq_length: neg_seq_len, pos_seq_length: pos_seq_len}
 
+def feed_dict_vali(on_training, batch_id, drop_prob):
+    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
+                                                                                                     batch_id)
+    query_len = len(query_in)
+    query_seq_len = [conf.max_seq_len] * query_len
+    pos_seq_len = [conf.max_seq_len] * query_len
+    neg_seq_len = [conf.max_seq_len] * query_len * NEG
+    return {query_batch: query_in, doc_pos_batch: doc_positive_in, doc_neg_batch: doc_negative_in,
+            on_train: on_training, drop_out_prob: drop_prob, query_seq_length: query_seq_len,
+            neg_seq_length: neg_seq_len, pos_seq_length: pos_seq_len}
 
 # config = tf.ConfigProto()  # log_device_placement=True)
 # config.gpu_options.allow_growth = True
@@ -323,7 +334,7 @@ with tf.Session() as sess:
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            loss_v = sess.run(loss, feed_dict=feed_dict(False, i, 1))
+            loss_v = sess.run(loss, feed_dict=feed_dict_vali(False, i, 1))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
