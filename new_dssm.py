@@ -31,7 +31,7 @@ conf = Config()
 
 bhv_act, ad_act,ac_act_neg = utils.GetActDat_v2(conf.file_train)
 bhv_act_test, ad_act_test,ac_act_neg_test  = utils.GetActDat_v2(conf.file_train)
-
+print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
 vectorizer.fit(ad_act + bhv_act+ ac_act_neg)
@@ -44,9 +44,9 @@ doc_vali_dat = vectorizer.transform(ad_act_test)
 doc_neg_vali_dat = vectorizer.transform(ac_act_neg_test)
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
 
-train_epoch_steps = int(query_train_dat.shape[0] / query_BS) # = number of samples / batch_size
+train_epoch_steps = int(query_train_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
 print ("train_epoch_steps:", train_epoch_steps)
-vali_epoch_steps = int(query_vali_dat.shape[0] / query_BS) # = number of samples / batch_size
+vali_epoch_steps = int(query_vali_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
 # data_train = data_input.get_data_by_dssm(conf.file_train)
 # print ("data_train['query'] len: ", data_train['query'].shape[0])
 # data_vali = data_input.get_data_by_dssm(conf.file_vali)

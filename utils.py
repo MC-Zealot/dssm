@@ -210,16 +210,20 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def pull_batch(on_training,query_data, doc_data,doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,doc_neg_batch,on_train_batch):
+    print("doc_neg_data shape",np.shape(doc_neg_data))
     # print ("pull batch %d-%d" % (batch_idx * BS, (batch_idx + 1) * BS))
     query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_pos_in = doc_data[batch_idx * BS:(batch_idx + 1) * BS, :]
-    print("query_in shape: ", np.shape(query_in))
-    query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
     doc_neg_in = doc_neg_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG, :]
-
+    print("query_in shape: ", np.shape(query_in))
+    print("doc_neg_in shape: ", np.shape(doc_neg_in))
+    query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
+    print("doc_neg_in[0]: ", doc_neg_in[0], ", doc_neg_in[1]: ", doc_neg_in[1], ",doc_neg_in[2]: ", doc_neg_in[2])
     doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
     doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
-    print ("query_in[0]: ", query_in[0], ", query_in[1]: ", query_in[1], ",query_in[2]: ", query_in[2])
+    # print ("query_in[0]: ", query_in[0], ", query_in[1]: ", query_in[1], ",query_in[2]: ", query_in[2])
+    # print ("doc_pos_in[0]: ", doc_pos_in[0], ", doc_pos_in[1]: ", doc_pos_in[1], ",doc_pos_in[2]: ", doc_pos_in[2])
+    print ("doc_neg_in[0]: ", doc_neg_in[0], ", doc_neg_in[1]: ", doc_neg_in[1], ",doc_neg_in[2]: ", doc_neg_in[2])
     return {query_batch: query_in, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in,on_train_batch: on_training}
 
 
@@ -235,8 +239,8 @@ def GetActDat_v2(FileName):
             prefix, query_pred, title, tag, label = spline
             if label == '0':
                 continue
-            query.append(prefix)
-            doc.append(title)
+            # query.append(prefix)
+            # doc.append(title)
             cur_arr = []
             query_pred = json.loads(query_pred)
             # only 4 negative sample
