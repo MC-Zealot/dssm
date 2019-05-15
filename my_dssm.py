@@ -11,23 +11,8 @@ import tensorflow as tf
 import data_input
 from config import Config
 
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-
-flags.DEFINE_string('summaries_dir', 'Summaries', 'Summaries directory')
-flags.DEFINE_float('learning_rate', 0.1, 'Initial learning rate.')
-flags.DEFINE_integer('max_steps', 80000, 'Number of steps to run trainer.')
-flags.DEFINE_integer('epoch_steps', 2000, "Number of steps in one epoch.")
-flags.DEFINE_integer('pack_size', 2000, "Number of batches in one pickle pack.")
-flags.DEFINE_integer('test_pack_size', 200, "Number of batches in one pickle pack.")
-flags.DEFINE_bool('gpu', 0, "Enable GPU or not")
-
-
 start = time.time()
 
-# TRIGRAM_D = 21128
-
-# TRIGRAM_D = 100
 # negative sample
 NEG = 4
 # query batch size
@@ -232,12 +217,9 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
 
 
 def pull_batch(data_map, batch_id):
-    query_in_tmp=np.mat(data_map['query'])
-    doc_positive_in_tmp=np.mat(data_map['doc_pos'])
-    doc_negative_in_tmp=np.mat(data_map['doc_neg'])
-    query_in = query_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
-    doc_positive_in = doc_positive_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
-    doc_negative_in = doc_negative_in_tmp[batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG, :]
+    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
+    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
+    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
 
     query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
 
@@ -262,22 +244,14 @@ def feed_dict(on_training, Train, batch_id):
             doc_negative_batch: doc_negative_in,
             on_train: on_training}
 
-config = tf.ConfigProto()  # log_device_placement=True)
+config = tf.ConfigProto()
+config.log_device_placement=True
 config.gpu_options.allow_growth = True
-#if not config.gpu:
-# config = tf.ConfigProto(device_count= {'GPU' : 0})
-
-
-#config = tf.ConfigProto(device_count={"CPU": 20}, # limit to num_cpu_core CPU usage
-#                inter_op_parallelism_threads=10,
-#                intra_op_parallelism_threads=20,
-#                log_device_placement=True)
 
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
 with tf.Session(config=config) as sess:
-# with tf.Session() as sess:
     sess.run(tf.global_variables_initializer()) #变量声明
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
