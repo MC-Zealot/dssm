@@ -41,13 +41,13 @@ L2_N = 120
 conf = Config()
 TRIGRAM_D = conf.max_seq_len
 data_train = data_input.get_data(conf.file_train)
-print ("data_train['query'] len: ", len(data_train['query']))
+#print ("data_train['query'] len: ", len(data_train['query']))
 data_vali = data_input.get_data(conf.file_vali)
-print ("data_vali['query'] len: ", len(data_vali['query']))
+#print ("data_vali['query'] len: ", len(data_vali['query']))
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
-print ("train_epoch_steps: ", train_epoch_steps)
-print ("vali_epoch_steps: ", vali_epoch_steps)
+#print ("train_epoch_steps: ", train_epoch_steps)
+#print ("vali_epoch_steps: ", vali_epoch_steps)
 
 
 def batch_normalization(x, phase_train, out_size):
@@ -95,7 +95,7 @@ def variable_summaries(var, name):
 
 with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
-    print ("TRIGRAM_D: ",TRIGRAM_D)
+    #print ("TRIGRAM_D: ",TRIGRAM_D)
     #定义数据结构，类型、shape
     query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
     doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
@@ -155,7 +155,7 @@ with tf.name_scope('Merge_Negative_Doc'):
 
     # 在正样本上合并负样本，tile可选择是否扩展负样本。
     for i in range(NEG):
-        print ("i: ",i)
+        #print ("i: ",i)
         for j in range(query_BS):
             # slice(input_, begin, size)切片API
             doc_y = tf.concat(
@@ -231,14 +231,26 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
     return query_in, doc_positive_in, doc_negative_in
 
 
-def pull_batch(data_map, batch_id):
-    query_in_tmp=np.mat(data_map['query'])
-    doc_positive_in_tmp=np.mat(data_map['doc_pos'])
-    doc_negative_in_tmp=np.mat(data_map['doc_neg'])
-    query_in = query_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
-    doc_positive_in = doc_positive_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
-    doc_negative_in = doc_negative_in_tmp[batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG, :]
+#def pull_batch(data_map, batch_id):
+#    query_in_tmp=np.mat(data_map['query'])
+#    doc_positive_in_tmp=np.mat(data_map['doc_pos'])
+#    doc_negative_in_tmp=np.mat(data_map['doc_neg'])
+#    query_in = query_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
+#    doc_positive_in = doc_positive_in_tmp[batch_id * query_BS:(batch_id + 1) * query_BS, :]
+#    doc_negative_in = doc_negative_in_tmp[batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG, :]
+#
+#    query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
+#
+#    return query_in, doc_positive_in, doc_negative_in
 
+def pull_batch(data_map, batch_id):
+    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
+    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
+    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
+
+    query_in = np.mat(query_in)
+    doc_positive_in = np.mat(doc_positive_in)
+    doc_negative_in = np.mat(doc_negative_in)
     query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
 
     return query_in, doc_positive_in, doc_negative_in
@@ -262,38 +274,30 @@ def feed_dict(on_training, Train, batch_id):
             doc_negative_batch: doc_negative_in,
             on_train: on_training}
 
-config = tf.ConfigProto()  # log_device_placement=True)
+config = tf.ConfigProto() 
+config.log_device_placement=True
 config.gpu_options.allow_growth = True
-#if not config.gpu:
-# config = tf.ConfigProto(device_count= {'GPU' : 0})
-
-
-#config = tf.ConfigProto(device_count={"CPU": 20}, # limit to num_cpu_core CPU usage
-#                inter_op_parallelism_threads=10,
-#                intra_op_parallelism_threads=20,
-#                log_device_placement=True)
 
 
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
 with tf.Session(config=config) as sess:
-# with tf.Session() as sess:
     sess.run(tf.global_variables_initializer()) #变量声明
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
     start = time.time()
     for epoch in range(conf.num_epoch):
         batch_ids = [i for i in range(train_epoch_steps)]
-        print ("batch_ids: ", batch_ids)
+        #print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
-            print("train batch_id:", batch_id)
+            #print("train batch_id:", batch_id)
             sess.run(train_step, feed_dict=feed_dict(True,True, batch_id))#模型训练
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
         for i in range(train_epoch_steps):
-            print("train 2 batch_id:", batch_id,", i: ",i)
+            #print("train 2 batch_id:", batch_id,", i: ",i)
             loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
             epoch_loss += loss_v
 
@@ -306,7 +310,7 @@ with tf.Session(config=config) as sess:
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            print("test batch_id:", batch_id,", i: ",i)
+            #print("test batch_id:", batch_id,", i: ",i)
             loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
