@@ -19,14 +19,15 @@ class Config(object):
     unk = '[UNK]'
     pad = '[PAD]'
     vocab_path = './data/vocab.txt'
+    # vocab_path = './data/vocab_filtered.txt'
     file_train = './data/oppo_round1_train_20180929_mini.txt'
     # file_train = './data/oppo_round1_train_20180929.txt'
     file_vali = './data/oppo_round1_vali_20180929_mini.txt'
     # file_vali = './data/oppo_round1_vali_20180929.txt'
     # max_seq_len = 21128
-    max_seq_len = 6231
+    # max_seq_len = 6231
     # TRIGRAM_D = 21128
-    # max_seq_len = 10
+    max_seq_len = 10
     hidden_size_rnn = 100
     use_stack_rnn = False
     learning_rate = 0.001

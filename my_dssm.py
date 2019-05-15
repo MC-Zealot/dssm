@@ -25,12 +25,12 @@ L2_N = 120
 # 读取数据
 conf = Config()
 TRIGRAM_D = conf.max_seq_len
-data_train = data_input.get_data(conf.file_train)
-print ("data_train['query'] len: ", len(data_train['query']))
-data_vali = data_input.get_data(conf.file_vali)
-print ("data_vali['query'] len: ", len(data_vali['query']))
-train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
-vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
+data_train = data_input.get_data_by_dssm(conf.file_train)
+print ("data_train['query'] len: ", data_train['query'].shape[0])
+data_vali = data_input.get_data_by_dssm(conf.file_vali)
+print ("data_vali['query'] len: ", data_vali['query'].shape[0])
+train_epoch_steps = int( data_train['query'].shape[0] / query_BS) - 1
+vali_epoch_steps = int(data_vali['query'].shape[0] / query_BS) - 1
 print ("train_epoch_steps: ", train_epoch_steps)
 print ("vali_epoch_steps: ", vali_epoch_steps)
 
@@ -82,9 +82,12 @@ with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
     print ("TRIGRAM_D: ",TRIGRAM_D)
     #定义数据结构，类型、shape
-    query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
-    doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
-    doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
+    # query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
+    # doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
+    # doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
+    query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
+    doc_positive_batch = tf.sparse_placeholder(tf.float32, name='doc_positive_batch')
+    doc_negative_batch = tf.sparse_placeholder(tf.float32, name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool)
 
 
@@ -196,10 +199,10 @@ with tf.name_scope('Train'):
 
 
 def pull_all(query_in, doc_positive_in, doc_negative_in):
-    query_in = sparse.coo_matrix(query_in)
-    doc_positive_in = sparse.coo_matrix(doc_positive_in)
-    doc_negative_in = sparse.coo_matrix(doc_negative_in)
 
+    query_in = query_in.tocoo()
+    doc_positive_in = doc_positive_in.tocoo()
+    doc_negative_in = doc_negative_in.tocoo()
     query_in = tf.SparseTensorValue(
         np.transpose([np.array(query_in.row, dtype=np.int64), np.array(query_in.col, dtype=np.int64)]),
         np.array(query_in.data, dtype=np.float),
@@ -217,9 +220,9 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
 
 
 def pull_batch(data_map, batch_id):
-    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS]
-    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG]
+    query_in = data_map['query'][batch_id * query_BS:(batch_id + 1) * query_BS,:]
+    doc_positive_in = data_map['doc_pos'][batch_id * query_BS:(batch_id + 1) * query_BS,:]
+    doc_negative_in = data_map['doc_neg'][batch_id * query_BS * NEG:(batch_id + 1) * query_BS * NEG,:]
 
     query_in, doc_positive_in, doc_negative_in = pull_all(query_in, doc_positive_in, doc_negative_in)
 
