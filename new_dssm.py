@@ -34,7 +34,7 @@ bhv_act_test, ad_act_test,ac_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
-vectorizer.fit(ad_act + bhv_act+ ac_act_neg)
+vectorizer.fit(ad_act + bhv_act+ ac_act_neg + bhv_act_test + ad_act_test + ac_act_neg_test)
 
 query_train_dat = vectorizer.transform(bhv_act)
 doc_train_dat = vectorizer.transform(ad_act)
@@ -220,7 +220,7 @@ with tf.name_scope('Train'):
     train_loss_summary = tf.summary.scalar('train_average_loss', train_average_loss)
 
 config = tf.ConfigProto()
-config.log_device_placement=True
+# config.log_device_placement=True
 config.gpu_options.allow_growth = True
 
 
@@ -246,7 +246,7 @@ with tf.Session(config=config) as sess:
 
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            print("train_loss batch_id:", batch_id, ", i: ", i,"loss_v: ",loss_v)
+            print("train_loss epoch:", epoch, ", i: ", i,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
         epoch_loss /= (train_epoch_steps)
@@ -261,7 +261,7 @@ with tf.Session(config=config) as sess:
             # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            print("test_loss batch_id:", batch_id, ", i: ", i,"loss_v: ",loss_v)
+            print("test_loss epoch:", epoch, ", i: ", i,"loss_v: ",loss_v)
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
