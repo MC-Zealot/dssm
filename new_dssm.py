@@ -258,11 +258,11 @@ with tf.Session(config=config) as sess:
         # test loss
         start = time.time()
         epoch_loss = 0
-        for i in range(vali_epoch_steps):
+        for index in range(vali_epoch_steps):
             # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            print("test_loss epoch:", epoch, ", i: ", i,"loss_v: ",loss_v)
+            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
