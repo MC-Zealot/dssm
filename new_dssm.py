@@ -47,6 +47,7 @@ TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩�
 train_epoch_steps = int(query_train_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
 print ("train_epoch_steps:", train_epoch_steps)
 vali_epoch_steps = int(query_vali_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
+print ("vali_epoch_steps:", vali_epoch_steps)
 # data_train = data_input.get_data_by_dssm(conf.file_train)
 # print ("data_train['query'] len: ", data_train['query'].shape[0])
 # data_vali = data_input.get_data_by_dssm(conf.file_vali)
@@ -219,7 +220,7 @@ with tf.name_scope('Train'):
     train_loss_summary = tf.summary.scalar('train_average_loss', train_average_loss)
 
 config = tf.ConfigProto()
-# config.log_device_placement=True
+config.log_device_placement=True
 config.gpu_options.allow_growth = True
 
 
@@ -233,7 +234,7 @@ with tf.Session(config=config) as sess:
     start = time.time()
     for epoch in range(conf.num_epoch):
         batch_ids = [i for i in range(train_epoch_steps)]
-        print ("batch_ids: ", batch_ids)
+        # print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
             print("train batch_id:", batch_id)
@@ -245,7 +246,7 @@ with tf.Session(config=config) as sess:
         for i in range(train_epoch_steps):
             print("train 2 batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
-            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_loss += loss_v
 
         epoch_loss /= (train_epoch_steps)
@@ -259,14 +260,13 @@ with tf.Session(config=config) as sess:
         for i in range(vali_epoch_steps):
             print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss,feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
         train_writer.add_summary(test_loss, epoch + 1)
         # test_writer.add_summary(test_loss, step + 1)
-        print("Epoch #%d | Test  Loss: %-4.3f | Calc_LossTime: %-3.3fs" %
-              (epoch, epoch_loss, start - end))
+        print("Epoch #%d | Test  Loss: %-4.3f | Calc_LossTime: %-3.3fs" % (epoch, epoch_loss, start - end))
 
     # 保存模型
     save_path = saver.save(sess, "model/model_1.ckpt")
