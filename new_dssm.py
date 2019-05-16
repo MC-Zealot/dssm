@@ -226,6 +226,7 @@ config.gpu_options.allow_growth = True
 # 创建一个Saver对象，选择性保存变量或者模型。
 saver = tf.train.Saver()
 with tf.Session(config=config) as sess:
+#with tf.InteractiveSession(config=config) as sess:
     sess.run(tf.global_variables_initializer()) #变量声明
     train_writer = tf.summary.FileWriter(conf.summaries_dir + '/train', sess.graph)
 
@@ -258,7 +259,7 @@ with tf.Session(config=config) as sess:
         for i in range(vali_epoch_steps):
             print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss,feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, batch_id, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss,feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
