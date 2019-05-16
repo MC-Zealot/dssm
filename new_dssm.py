@@ -244,9 +244,10 @@ with tf.Session(config=config) as sess:
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
         for i in range(train_epoch_steps):
-            print("train 2 batch_id:", batch_id,", i: ",i)
+
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            print("train_loss batch_id:", batch_id, ", i: ", i,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
         epoch_loss /= (train_epoch_steps)
@@ -258,9 +259,10 @@ with tf.Session(config=config) as sess:
         start = time.time()
         epoch_loss = 0
         for i in range(vali_epoch_steps):
-            print("test batch_id:", batch_id,", i: ",i)
+            # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            print("test_loss batch_id:", batch_id, ", i: ", i,"loss_v: ",loss_v)
             epoch_loss += loss_v
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
