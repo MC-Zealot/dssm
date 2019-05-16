@@ -30,7 +30,7 @@ conf = Config()
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
 bhv_act, ad_act,ac_act_neg = utils.GetActDat_v2(conf.file_train)
-bhv_act_test, ad_act_test,ac_act_neg_test  = utils.GetActDat_v2(conf.file_train)
+bhv_act_test, ad_act_test,ac_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
@@ -105,10 +105,10 @@ with tf.name_scope('input'):
     # query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
     # doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     # doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
-    query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
-    print ("query_batch shape: ",query_batch.shape)
-    doc_positive_batch = tf.sparse_placeholder(tf.float32, name='doc_positive_batch')
-    doc_negative_batch = tf.sparse_placeholder(tf.float32, name='doc_negative_batch')
+    query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
+    # print ("query_batch shape: ",query_batch.shape)
+    doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
+    doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool)
 
 
@@ -164,7 +164,7 @@ with tf.name_scope('Merge_Negative_Doc'):
 
     # 在正样本上合并负样本，tile可选择是否扩展负样本。
     for i in range(conf.NEG):
-        print ("i: ",i)
+        # print ("i: ",i)
         for j in range(query_BS):
             # slice(input_, begin, size)切片API
             doc_y = tf.concat(
