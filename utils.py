@@ -185,13 +185,13 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def pull_batch(on_training,query_data, doc_data,doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,doc_neg_batch,on_train_batch):
-    # print("doc_data shape",np.shape(doc_data))
-    # print("doc_neg_data shape",np.shape(doc_neg_data))
+    print("batch_idx: ",batch_idx, "doc_data shape",np.shape(doc_data))
+    print("batch_idx: ",batch_idx, "doc_neg_data shape",np.shape(doc_neg_data))
     query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_pos_in = doc_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_neg_in = doc_neg_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG, :]
-    # print("query_in shape: ", np.shape(query_in))
-    # print("doc_neg_in shape: ", np.shape(doc_neg_in))
+    print("batch_idx: ",batch_idx, "query_in shape: ", np.shape(query_in))
+    print("batch_idx: ",batch_idx, "doc_neg_in shape: ", np.shape(doc_neg_in))
     query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
     doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
     doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
