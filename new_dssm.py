@@ -220,7 +220,7 @@ with tf.name_scope('Train'):
     train_loss_summary = tf.summary.scalar('train_average_loss', train_average_loss)
 
 config = tf.ConfigProto()
-config.log_device_placement=True
+#config.log_device_placement=True
 config.gpu_options.allow_growth = True
 
 
