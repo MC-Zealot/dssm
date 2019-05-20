@@ -24,10 +24,10 @@ L2_N = 120
 
 # 读取数据
 conf = Config()
-TRIGRAM_D = conf.max_seq_len
-data_train = data_input.get_data_by_dssm(conf.file_train)
+TRIGRAM_D = conf.nwords
+data_train = data_input.get_data_by_dssm2(conf.file_train)
 print ("data_train['query'] len: ", data_train['query'].shape[0])
-data_vali = data_input.get_data_by_dssm(conf.file_vali)
+data_vali = data_input.get_data_by_dssm2(conf.file_vali)
 print ("data_vali['query'] len: ", data_vali['query'].shape[0])
 train_epoch_steps = int( data_train['query'].shape[0] / query_BS) - 1
 vali_epoch_steps = int(data_vali['query'].shape[0] / query_BS) - 1
@@ -204,7 +204,6 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
     query_in = query_in.tocoo()
     doc_positive_in = doc_positive_in.tocoo()
     doc_negative_in = doc_negative_in.tocoo()
-    print("query_in shape: ", np.shape(query_in))
     query_in = tf.SparseTensorValue(
         np.transpose([np.array(query_in.row, dtype=np.int64), np.array(query_in.col, dtype=np.int64)]),
         np.array(query_in.data, dtype=np.float),
@@ -217,8 +216,8 @@ def pull_all(query_in, doc_positive_in, doc_negative_in):
         np.transpose([np.array(doc_negative_in.row, dtype=np.int64), np.array(doc_negative_in.col, dtype=np.int64)]),
         np.array(doc_negative_in.data, dtype=np.float),
         np.array(doc_negative_in.shape, dtype=np.int64))
-    print("query_in shape: ", np.shape(query_in))
-    print ("query_in[0]: ", query_in[0], ", query_in[1]: ",query_in[1],",query_in[2]: ",query_in[2])
+    # print("query_in shape: ", np.shape(query_in))
+    # print ("query_in[0]: ", query_in[0], ", query_in[1]: ",query_in[1],",query_in[2]: ",query_in[2])
     return query_in, doc_positive_in, doc_negative_in
 
 

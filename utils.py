@@ -5,6 +5,7 @@ from config import Config
 import numpy as np
 from scipy.sparse import csr_matrix
 import tensorflow as tf
+from sklearn.feature_extraction.text import CountVectorizer
 
 # 配置文件
 conf = Config()
@@ -185,13 +186,13 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def pull_batch(on_training,query_data, doc_data,doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,doc_neg_batch,on_train_batch):
-    print("batch_idx: ",batch_idx, "doc_data shape",np.shape(doc_data))
-    print("batch_idx: ",batch_idx, "doc_neg_data shape",np.shape(doc_neg_data))
+    # print("batch_idx: ",batch_idx, "doc_data shape",np.shape(doc_data))
+    # print("batch_idx: ",batch_idx, "doc_neg_data shape",np.shape(doc_neg_data))
     query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_pos_in = doc_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_neg_in = doc_neg_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG, :]
-    print("batch_idx: ",batch_idx, "query_in shape: ", np.shape(query_in))
-    print("batch_idx: ",batch_idx, "doc_neg_in shape: ", np.shape(doc_neg_in))
+    # print("batch_idx: ",batch_idx, "query_in shape: ", np.shape(query_in))
+    # print("batch_idx: ",batch_idx, "doc_neg_in shape: ", np.shape(doc_neg_in))
     query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
     doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
     doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
@@ -227,15 +228,50 @@ def GetActDat_v2(FileName):
                 doc.append(title)
                 doc_neg.extend(cur_arr[:conf.NEG])
 
+    return query, doc,doc_neg
+
+def GetActDat_v3(FileName):
+    query = []
+    doc = []
+    doc_neg=[]
+    with open(FileName, encoding='utf8') as f:
+        for line in f.readlines():
+            spline = line.strip().split('\t')
+            if len(spline) < 4:
+                continue
+            prefix, query_pred, title, tag, label = spline
+            if label == '0':
+                continue
+            # query.append(prefix)
+            # doc.append(title)
+            cur_arr = []
+            query_pred = json.loads(query_pred)
+            # only 4 negative sample
+            for each in query_pred:  # 从预测的query中，找4个负例
+                if each == title:
+                    continue
+                cur_arr.append(each)
+            if len(cur_arr) >= 4:
+                query.append(prefix)
+                doc.append(title)
+                doc_neg.extend(cur_arr[:conf.NEG])
 
     return query, doc,doc_neg
 
 if __name__ == '__main__':
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
-    file_train = './data/oppo_round1_train_20180929.txt'
+    file_train = './data/oppo_round1_train_20180929_mini.txt'
     file_vali = './data/oppo_round1_vali_20180929.txt'
     # data_train = get_data(file_train)
     # data_train = get_data(file_vali)
     # print(len(data_train['query']), len(data_train['doc_pos']), len(data_train['doc_neg']))
+    bhv_act, ad_act, ac_act_neg = GetActDat_v2(file_train)
+    print("len: ", len(bhv_act),", bhv_act: ",bhv_act)
+    bhv_act= set(bhv_act)
+    print("len: ", len(bhv_act),", bhv_act: ",bhv_act)
+    vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
+    vectorizer.fit(bhv_act)
+    TRIGRAM_D = len(vectorizer.get_feature_names())  # 词库大小，aka 稀疏矩阵列数
+    print("TRIGRAM_D: ", TRIGRAM_D)
     pass

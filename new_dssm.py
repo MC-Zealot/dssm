@@ -20,8 +20,8 @@ start = time.time()
 query_BS = 100
 # batch size
 
-L1_N = 400
-L2_N = 120
+L1_N = 2000
+L2_N = 1000
 
 # 读取数据
 conf = Config()
@@ -37,6 +37,7 @@ vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
 vectorizer.fit(ad_act + bhv_act+ ac_act_neg + bhv_act_test + ad_act_test + ac_act_neg_test)
 
 query_train_dat = vectorizer.transform(bhv_act)
+print (type(query_train_dat))
 doc_train_dat = vectorizer.transform(ad_act)
 doc_neg_train_dat = vectorizer.transform(ac_act_neg)
 query_vali_dat = vectorizer.transform(bhv_act_test)
@@ -197,7 +198,10 @@ with tf.name_scope('Loss'):
     prob = tf.nn.softmax(cos_sim)
     # 只取第一列，即正样本列概率。
     hit_prob = tf.slice(prob, [0, 0], [-1, 1])
-    loss = -tf.reduce_sum(tf.log(hit_prob))
+    loss = -tf.reduce_sum(tf.log(hit_prob+1e-7))#防止nan
+
+    # loss = -tf.reduce_sum(tf.log(tf.clip_by_value(hit_prob, 1e-8, 1.0)))
+
     tf.summary.scalar('loss', loss)
 
 with tf.name_scope('Training'):

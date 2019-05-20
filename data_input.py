@@ -50,6 +50,14 @@ def convert_word2id(query, vocab_map):
     ids = np.array(ids)
     return ids[:conf.max_seq_len]
 
+def convert_seq2bow(query, vocab_map):
+    bow_ids = np.zeros(conf.nwords)
+    for w in query:
+        if w in vocab_map:
+            bow_ids[vocab_map[w]] += 1
+        else:
+            bow_ids[vocab_map[conf.unk]] += 1
+    return bow_ids
 
 def convert_word2id_for_dssm(query, vocab_map):
     """
@@ -108,6 +116,48 @@ def get_data_by_dssm(file_path):
     data_map['doc_neg'] = csr_matrix(data_map['doc_neg'],(np.shape(data_map['doc_neg'])[0], conf.max_seq_len), dtype=np.float32)
 
     return data_map
+
+def get_data_by_dssm2(file_path):
+    """
+    gen datasets, convert word into word ids.
+    :param file_path:
+    :return: [[query, pos sample, 4 neg sample]], shape = [n, 6]
+    """
+    data_map = {'query': [], 'query_len': [], 'doc_pos': [],  'doc_pos_len': [], 'doc_neg': [], 'doc_neg_len': []}
+    with open(file_path, encoding='utf8') as f:
+        for line in f.readlines():
+            spline = line.strip().split('\t')
+            if len(spline) < 4:
+                continue
+            prefix, query_pred, title, tag, label = spline
+            if label == '0':
+                continue
+            cur_arr, cur_len = [], []
+            query_pred = json.loads(query_pred)
+            # only 4 negative sample
+            for each in query_pred: #从预测的query中，找4个负例
+                if each == title:
+                    continue
+                cur_arr.append(convert_seq2bow(each, conf.vocab_map))
+                each_len = len(each) if len(each) < conf.max_seq_len else conf.max_seq_len
+                cur_len.append(each_len)
+            if len(cur_arr) >= 4:
+                data_map['query'].append(convert_seq2bow(prefix, conf.vocab_map))
+                data_map['query_len'].append(len(prefix) if len(prefix) < conf.max_seq_len else conf.max_seq_len)
+                data_map['doc_pos'].append(convert_seq2bow(title, conf.vocab_map))  #点击的query当做正例
+                data_map['doc_pos_len'].append(len(title) if len(title) < conf.max_seq_len else conf.max_seq_len)
+                data_map['doc_neg'].extend(cur_arr[:4])  #只取前4个负例
+                data_map['doc_neg_len'].extend(cur_len[:4])
+            # print("query_in shape....: ", np.shape(data_map['query']))
+            pass
+
+    data_map['query'] = csr_matrix(data_map['query'],(np.shape(data_map['query'])[0], conf.nwords), dtype=np.float32)
+    data_map['doc_pos'] = csr_matrix(data_map['doc_pos'],(np.shape(data_map['doc_pos'])[0], conf.nwords), dtype=np.float32)
+    data_map['doc_neg'] = csr_matrix(data_map['doc_neg'],(np.shape(data_map['doc_neg'])[0], conf.nwords), dtype=np.float32)
+
+    return data_map
+
+
 
 def get_data(file_path):
     """
