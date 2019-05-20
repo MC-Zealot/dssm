@@ -139,15 +139,11 @@ def get_data_by_dssm2(file_path):
                 if each == title:
                     continue
                 cur_arr.append(convert_seq2bow(each, conf.vocab_map))
-                each_len = len(each) if len(each) < conf.max_seq_len else conf.max_seq_len
-                cur_len.append(each_len)
             if len(cur_arr) >= 4:
                 data_map['query'].append(convert_seq2bow(prefix, conf.vocab_map))
-                data_map['query_len'].append(len(prefix) if len(prefix) < conf.max_seq_len else conf.max_seq_len)
                 data_map['doc_pos'].append(convert_seq2bow(title, conf.vocab_map))  #点击的query当做正例
                 data_map['doc_pos_len'].append(len(title) if len(title) < conf.max_seq_len else conf.max_seq_len)
                 data_map['doc_neg'].extend(cur_arr[:4])  #只取前4个负例
-                data_map['doc_neg_len'].extend(cur_len[:4])
             # print("query_in shape....: ", np.shape(data_map['query']))
             pass
 
