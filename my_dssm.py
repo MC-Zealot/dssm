@@ -86,7 +86,7 @@ with tf.name_scope('input'):
     # doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     # doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
-    print ("query_batch shape: ",query_batch.shape)
+    # print ("query_batch shape: ",query_batch.shape)
     doc_positive_batch = tf.sparse_placeholder(tf.float32, name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool)
