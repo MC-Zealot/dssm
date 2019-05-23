@@ -29,9 +29,9 @@ class Config(object):
     max_seq_len = 10
     hidden_size_rnn = 100
     use_stack_rnn = False
-    learning_rate = 0.001
+    learning_rate = 0.1
     # max_steps = 8000
-    num_epoch = 40
+    num_epoch = 20
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample

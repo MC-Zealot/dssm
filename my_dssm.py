@@ -20,10 +20,12 @@ query_BS = 100
 # batch size
 BS = query_BS * NEG
 L1_N = 400
-L2_N = 120
+L2_N = 350
 
 # 读取数据
+print ("0")
 conf = Config()
+print ("1")
 TRIGRAM_D = conf.nwords
 data_train = data_input.get_data_by_dssm2(conf.file_train)
 print ("data_train['query'] len: ", data_train['query'].shape[0])
@@ -86,7 +88,7 @@ with tf.name_scope('input'):
     # doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     # doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
-    print ("query_batch shape: ",query_batch.shape)
+    #print ("query_batch shape: ",query_batch.shape)
     doc_positive_batch = tf.sparse_placeholder(tf.float32, name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool)
