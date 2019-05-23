@@ -20,7 +20,7 @@ query_BS = 100
 # batch size
 BS = query_BS * NEG
 L1_N = 400
-L2_N = 120
+L2_N = 100
 
 # 读取数据
 conf = Config()
@@ -77,6 +77,23 @@ def variable_summaries(var, name):
         tf.summary.scalar('min/' + name, tf.reduce_min(var))
         tf.summary.histogram(name, var)
 
+def get_nb_params_shape(shape):
+    '''
+    Computes the total number of params for a given shap.
+    Works for any number of shapes etc [D,F] or [W,H,C] computes D*F and W*H*C.
+    '''
+    nb_params = 1
+    for dim in shape:
+        nb_params = nb_params*int(dim)
+    return nb_params
+
+def count3():
+    tot_nb_params = 0
+    for trainable_variable in tf.trainable_variables():
+        shape = trainable_variable.get_shape()  # e.g [D,F] or [W,H,C]
+        current_nb_params = get_nb_params_shape(shape)
+        tot_nb_params = tot_nb_params + current_nb_params
+    return tot_nb_params
 
 with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
@@ -295,6 +312,7 @@ with tf.Session(config=config) as sess:
         print("Epoch #%d | Test  Loss: %-4.3f | Calc_LossTime: %-3.3fs" %
               (epoch, epoch_loss, start - end))
 
+    print ("param count:", count3())
     # 保存模型
     save_path = saver.save(sess, "model/model_1.ckpt")
     print("Model saved in file: ", save_path)
