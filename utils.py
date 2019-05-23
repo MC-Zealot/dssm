@@ -222,8 +222,15 @@ def GetActDat_v2(FileName):
             for each in query_pred:  # 从预测的query中，找4个负例
                 if each == title:
                     continue
+                each = [i for i in each]
+                each = " ".join(each)
+                # print ("each: ", each)
                 cur_arr.append(each)
             if len(cur_arr) >= 4:
+                prefix = [i for i in prefix]
+                title = [i for i in title]
+                prefix = " ".join(prefix)
+                title = " ".join(title)
                 query.append(prefix)
                 doc.append(title)
                 doc_neg.extend(cur_arr[:conf.NEG])
@@ -261,17 +268,15 @@ def GetActDat_v3(FileName):
 if __name__ == '__main__':
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
-    file_train = './data/oppo_round1_train_20180929_mini.txt'
-    file_vali = './data/oppo_round1_vali_20180929.txt'
-    # data_train = get_data(file_train)
-    # data_train = get_data(file_vali)
-    # print(len(data_train['query']), len(data_train['doc_pos']), len(data_train['doc_neg']))
+    file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
     bhv_act, ad_act, ac_act_neg = GetActDat_v2(file_train)
     print("len: ", len(bhv_act),", bhv_act: ",bhv_act)
     bhv_act= set(bhv_act)
     print("len: ", len(bhv_act),", bhv_act: ",bhv_act)
     vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
+    # vectorizer = CountVectorizer()
     vectorizer.fit(bhv_act)
-    TRIGRAM_D = len(vectorizer.get_feature_names())  # 词库大小，aka 稀疏矩阵列数
+    feature_names = vectorizer.get_feature_names()
+    TRIGRAM_D = len(feature_names)  # 词库大小，aka 稀疏矩阵列数
+    print("feature_names: ", feature_names)
     print("TRIGRAM_D: ", TRIGRAM_D)
-    pass

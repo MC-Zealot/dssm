@@ -83,6 +83,7 @@ def get_data_by_dssm(file_path):
     :param file_path:
     :return: [[query, pos sample, 4 neg sample]], shape = [n, 6]
     """
+    index=0
     data_map = {'query': [], 'query_len': [], 'doc_pos': [],  'doc_pos_len': [], 'doc_neg': [], 'doc_neg_len': []}
     with open(file_path, encoding='utf8') as f:
         for line in f.readlines():
@@ -123,15 +124,22 @@ def get_data_by_dssm2(file_path):
     :param file_path:
     :return: [[query, pos sample, 4 neg sample]], shape = [n, 6]
     """
-    data_map = {'query': [], 'query_len': [], 'doc_pos': [],  'doc_pos_len': [], 'doc_neg': [], 'doc_neg_len': []}
-    with open(file_path, encoding='utf8') as f:
-        for line in f.readlines():
+    print ("start...", file_path)
+    data_map = {'query': [], 'doc_pos': [], 'doc_neg': []}
+    #with open(file_path, encoding='utf8') as f:
+    index_pos = 0
+    with open(file_path) as f:
+        #for line in f.readlines():
+        for line in f:
             spline = line.strip().split('\t')
             if len(spline) < 4:
                 continue
             prefix, query_pred, title, tag, label = spline
             if label == '0':
                 continue
+            index_pos+=1
+            if index_pos % 10000 == 0: 
+                print ("index_pos: ", index_pos)
             cur_arr, cur_len = [], []
             query_pred = json.loads(query_pred)
             # only 4 negative sample
@@ -142,11 +150,10 @@ def get_data_by_dssm2(file_path):
             if len(cur_arr) >= 4:
                 data_map['query'].append(convert_seq2bow(prefix, conf.vocab_map))
                 data_map['doc_pos'].append(convert_seq2bow(title, conf.vocab_map))  #点击的query当做正例
-                data_map['doc_pos_len'].append(len(title) if len(title) < conf.max_seq_len else conf.max_seq_len)
                 data_map['doc_neg'].extend(cur_arr[:4])  #只取前4个负例
             # print("query_in shape....: ", np.shape(data_map['query']))
             pass
-
+    print ("end...")
     data_map['query'] = csr_matrix(data_map['query'],(np.shape(data_map['query'])[0], conf.nwords), dtype=np.float32)
     data_map['doc_pos'] = csr_matrix(data_map['doc_pos'],(np.shape(data_map['doc_pos'])[0], conf.nwords), dtype=np.float32)
     data_map['doc_neg'] = csr_matrix(data_map['doc_neg'],(np.shape(data_map['doc_neg'])[0], conf.nwords), dtype=np.float32)

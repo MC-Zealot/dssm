@@ -20,10 +20,12 @@ query_BS = 100
 # batch size
 BS = query_BS * NEG
 L1_N = 400
-L2_N = 100
+L2_N = 350
 
 # 读取数据
+print ("0")
 conf = Config()
+print ("1")
 TRIGRAM_D = conf.nwords
 data_train = data_input.get_data_by_dssm2(conf.file_train)
 print ("data_train['query'] len: ", data_train['query'].shape[0])
