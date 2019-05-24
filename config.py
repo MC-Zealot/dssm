@@ -21,17 +21,17 @@ class Config(object):
     #vocab_path = '/Users/Zealot/yizhou/yizhou/git/dssm/data/vocab.txt'
     vocab_path = './data/vocab.txt'
     # vocab_path = './data/vocab_filtered.txt'
-    file_train = './data/oppo_round1_train_20180929_mini.txt'
-    #file_train = './data/oppo_round1_train_20180929.txt'
+    #file_train = './data/oppo_round1_train_20180929_mini.txt'
+    file_train = './data/oppo_round1_train_20180929.txt'
     #file_train = './data/oppo_round1_train_20180929_2.txt'
-    file_vali = './data/oppo_round1_vali_20180929_mini.txt'
-    #file_vali = './data/oppo_round1_vali_20180929.txt'
+    #file_vali = './data/oppo_round1_vali_20180929_mini.txt'
+    file_vali = './data/oppo_round1_vali_20180929.txt'
     max_seq_len = 10
     hidden_size_rnn = 100
     use_stack_rnn = False
-    learning_rate = 0.1
+    learning_rate = 0.01
     # max_steps = 8000
-    num_epoch = 10
+    num_epoch = 15
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
