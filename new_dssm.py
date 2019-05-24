@@ -29,20 +29,20 @@ conf = Config()
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act,ac_act_neg = utils.GetActDat_v2(conf.file_train)
-bhv_act_test, ad_act_test,ac_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
+bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
+bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
-vectorizer.fit(ad_act + bhv_act+ ac_act_neg)
+vectorizer.fit(ad_act + bhv_act + ad_act_neg)
 
 query_train_dat = vectorizer.transform(bhv_act)
 print (type(query_train_dat))
 doc_train_dat = vectorizer.transform(ad_act)
-doc_neg_train_dat = vectorizer.transform(ac_act_neg)
+doc_neg_train_dat = vectorizer.transform(ad_act_neg)
 query_vali_dat = vectorizer.transform(bhv_act_test)
 doc_vali_dat = vectorizer.transform(ad_act_test)
-doc_neg_vali_dat = vectorizer.transform(ac_act_neg_test)
+doc_neg_vali_dat = vectorizer.transform(ad_act_neg_test)
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
 
 train_epoch_steps = int(query_train_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
@@ -198,9 +198,9 @@ with tf.name_scope('Loss'):
     prob = tf.nn.softmax(cos_sim)
     # 只取第一列，即正样本列概率。
     hit_prob = tf.slice(prob, [0, 0], [-1, 1])
-    loss = -tf.reduce_sum(tf.log(hit_prob+1e-7))#防止nan
+    loss = -tf.reduce_sum(tf.log(hit_prob))
 
-    # loss = -tf.reduce_sum(tf.log(tf.clip_by_value(hit_prob, 1e-8, 1.0)))
+    # loss = -tf.reduce_sum(tf.log(tf.clip_by_value(hit_prob, 1e-8, 1.0)))#防止nan
 
     tf.summary.scalar('loss', loss)
 
