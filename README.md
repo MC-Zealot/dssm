@@ -1,3 +1,6 @@
+sh run.sh
+
+
 [Learning Deep Structured Semantic Models for Web Search using Clickthrough Data](https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/)以及其后续文章
 
 [A Multi-View Deep Learning Approach for Cross Domain User Modeling in Recommendation Systems](http://blog.csdn.net/shine19930820/article/details/78810984)的实现Demo。
