@@ -1,4 +1,10 @@
+环境：
+python 3.6
+tensorflow 1.6
+dssm执行命令：
 sh run.sh
+查看gpu使用情况：
+sh gpu_info.sh
 
 
 [Learning Deep Structured Semantic Models for Web Search using Clickthrough Data](https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/)以及其后续文章
