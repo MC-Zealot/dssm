@@ -86,13 +86,13 @@ def test1(FileName):
     print("feature_names: ", feature_names)
     print("TRIGRAM_D: ", TRIGRAM_D)
 
-def save_vectorizer(vectorizer,path='mapping_data'):
+def save_vectorizer(vectorizer,path='data/vectorizer_data'):
     modelFileSave = open(path, 'wb')
     pickle.dump(vectorizer, modelFileSave)
     modelFileSave.close()
 
 
-def load_vectorizer(path='mapping_data'):
+def load_vectorizer(path='data/vectorizer_data'):
     modelFileLoad = open(path, 'rb')
     vec = pickle.load(modelFileLoad)
     return vec
