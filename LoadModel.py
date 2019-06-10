@@ -37,28 +37,20 @@ graph = tf.get_default_graph()
 # for n in graph.as_graph_def().node:
 #     print ("node: ",n.name)
 
-# print(sess.run('BN2/embedding_query_y:0'))
-# print(sess.run('BN2/embedding_doc_positive_y:0'))
 query_y = graph.get_tensor_by_name("BN2/embedding_query_y:0")
+# on_train = graph.get_tensor_by_name(tf.bool, name='input/on_train:0')
+on_train = graph.get_tensor_by_name("input/on_train:0")
+# on_train = tf.placeholder(tf.bool, name='input/on_train:0')
+query_batch = graph.get_tensor_by_name("input/query_batch:0")
+# query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
 # query_y = graph.get_operation_by_name("BN2/embedding_query_y").outputs[0]
-# query_batch = graph.get_tensor_by_name("input/query_batch:0")
-query_batch = tf.sparse_placeholder(tf.float32, name='query_batch')
-on_train = tf.placeholder(tf.bool, name='input/on_train')
+
+
+
+
 # query_batch = graph.get_operation_by_name("input/query_batch").outputs[0]
 
 Bhv_in = convert_sparse_matrix_to_sparse_tensor(vectorizer.transform(bhv_act_test))
 
 y = sess.run(query_y, feed_dict={query_batch: Bhv_in, on_train: False})
-
-exit(0)
-w1 = graph.get_tensor_by_name("BN2/embedding_query_y:0")
-w2 = graph.get_tensor_by_name("BN2/embedding_doc_positive_y:0")
-feed_dict = {w1: 13.0, w2: 17.0}
-
-#接下来，访问你想要执行的op
-op_to_restore = graph.get_tensor_by_name("op_to_restore:0")
-
-
-
-print(sess.run(op_to_restore,feed_dict))
-#打印结果为60.0==>(13+17)*2
+# y = sess.run(query_y, feed_dict={query_batch: Bhv_in})
