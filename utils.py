@@ -36,6 +36,11 @@ def pull_batch(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, q
 
 
 def GetActDat_v2(FileName):
+    """
+
+    :param FileName:
+    :return:query, doc, doc_neg
+    """
     query = []
     doc = []
     doc_neg = []
