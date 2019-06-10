@@ -5,6 +5,7 @@ from config import Config
 import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
+import pickle
 
 # 配置文件
 conf = Config()
@@ -69,8 +70,7 @@ def GetActDat_v2(FileName):
 
     return query, doc, doc_neg
 
-
-if __name__ == '__main__':
+def test1(FileName):
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
     file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
@@ -85,3 +85,18 @@ if __name__ == '__main__':
     TRIGRAM_D = len(feature_names)  # 词库大小，aka 稀疏矩阵列数
     print("feature_names: ", feature_names)
     print("TRIGRAM_D: ", TRIGRAM_D)
+
+def save_vectorizer(vectorizer,path='mapping_data'):
+    modelFileSave = open(path, 'wb')
+    pickle.dump(vectorizer, modelFileSave)
+    modelFileSave.close()
+
+
+def load_vectorizer(path='mapping_data'):
+    modelFileLoad = open(path, 'rb')
+    vec = pickle.load(modelFileLoad)
+    return vec
+
+
+if __name__ == '__main__':
+    print("hello")

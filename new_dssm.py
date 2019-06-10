@@ -35,6 +35,7 @@ print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
 vectorizer.fit(ad_act + bhv_act + ad_act_neg)
+utils.save_vectorizer(vectorizer)
 
 query_train_dat = vectorizer.transform(bhv_act)
 print (type(query_train_dat))
@@ -156,9 +157,9 @@ with tf.name_scope('BN2'):
     doc_positive_l2 = tf.slice(doc_l2, [0, 0], [query_BS, -1])
     doc_negative_l2 = tf.slice(doc_l2, [query_BS, 0], [-1, -1])
 
-    query_y = tf.nn.relu(query_l2)
-    doc_positive_y = tf.nn.relu(doc_positive_l2)
-    doc_negative_y = tf.nn.relu(doc_negative_l2)
+    query_y = tf.nn.relu(query_l2,name='embedding_query_y')
+    doc_positive_y = tf.nn.relu(doc_positive_l2,name='embedding_doc_positive_y')
+    doc_negative_y = tf.nn.relu(doc_negative_l2,name='embedding_doc_negative_y')
 
 with tf.name_scope('Merge_Negative_Doc'):
     #获取正样本
