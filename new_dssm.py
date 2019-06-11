@@ -181,9 +181,10 @@ with tf.name_scope('Merge_Negative_Doc'):
 with tf.name_scope('Cosine_Similarity'):
     # Cosine similarity
     # query_norm = sqrt(sum(each x^2))
-    query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True)), [conf.NEG + 1, 1]) #包括了query的embedding
+    query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True)), [conf.NEG + 1, 1], name='query_norm') #包括了query的embedding
+    query_norm_single = tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True), name='query_norm_single') #包括了query的embedding
     # doc_norm = sqrt(sum(each x^2))
-    doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True))  #doc_y  shape: (500,120)，包括了正例的embedding
+    doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True), name='doc_norm')  #doc_y  shape: (500,120)，包括了正例的embedding
 
     prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [conf.NEG + 1, 1]), doc_y), 1, True)
     norm_prod = tf.multiply(query_norm, doc_norm)

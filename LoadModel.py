@@ -3,30 +3,10 @@ from utils import *
 
 # 读取数据
 conf = Config()
-sess=tf.Session()
+sess = tf.Session()
 #先加载图和参数变量
 saver = tf.train.import_meta_graph('./model/model_1.ckpt.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./model'))
-
-
-# #得到该网络中，所有可以加载的参数
-# variables = tf.contrib.framework.get_variables_to_restore()
-#
-# #删除output层中的参数
-# variables_to_resotre = [v for v in variables if v.name.split('/')[0]!='Merge_Negative_Doc'
-#                                             or v.name.split('/')[0]!='Cosine_Similarity'
-#                                             or v.name.split('/')[0]!='Loss'
-#                                             or v.name.split('/')[0] != 'Accuracy'
-#                                             or v.name.split('/')[0] != 'Training'
-#                                             or v.name.split('/')[0] != 'Test'
-#                                             or v.name.split('/')[0] != 'Train'
-#                         ]
-# #构建这部分参数的saver
-# saver = tf.train.Saver(variables_to_resotre)
-# saver.restore(sess,'./model/model_1.ckpt.meta')
-
-
-
 
 vectorizer = utils.load_vectorizer()#字典
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
@@ -39,6 +19,7 @@ graph = tf.get_default_graph()
 #     print ("node: ",n.name)
 
 query_y = graph.get_tensor_by_name("BN2/embedding_query_y:0")
+query_norm_single = graph.get_tensor_by_name("Cosine_Similarity/query_norm_single:0")
 on_train = graph.get_tensor_by_name("input/on_train:0")
 # query_batch = graph.get_tensor_by_name("input/query_batch:0")
 query_batch_indices = graph.get_tensor_by_name("input/query_batch/indices:0")
@@ -55,4 +36,18 @@ print("Bhv_in len: ",len(Bhv_in))
 # print("Bhv_in[1]: ",Bhv_in[1])
 
 y = sess.run(query_y, feed_dict={query_batch_indices: Bhv_in[0],query_batch_values: Bhv_in[1],query_batch_shape: Bhv_in[2], on_train: False})
+query_norm_single = sess.run(query_norm_single, feed_dict={query_batch_indices: Bhv_in[0],query_batch_values: Bhv_in[1],query_batch_shape: Bhv_in[2], on_train: False})
 print("y:" ,y[0],", len: ", len(y),", d: ",len(y[0]))
+print("query_norm_single:" ,query_norm_single[0],", len: ", len(query_norm_single),", d: ",len(query_norm_single[0]))
+
+#todo: 保存mid向量
+
+for i in range(len(y)):
+    s = []
+    index = 0
+    for j in y[i].tolist():
+        j_s = str(j)
+        if j_s != "0.0" and j > 0.0001:
+            s.append(str(index) + ":" + j_s[0:6])
+        index += 1
+    print(bhv_act_test[i] + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s))
