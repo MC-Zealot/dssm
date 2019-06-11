@@ -40,14 +40,18 @@ query_norm_single = sess.run(query_norm_single, feed_dict={query_batch_indices: 
 print("y:" ,y[0],", len: ", len(y),", d: ",len(y[0]))
 print("query_norm_single:" ,query_norm_single[0],", len: ", len(query_norm_single),", d: ",len(query_norm_single[0]))
 
-#todo: 保存mid向量
 
-for i in range(len(y)):
-    s = []
-    index = 0
-    for j in y[i].tolist():
-        j_s = str(j)
-        if j_s != "0.0" and j > 0.0001:
-            s.append(str(index) + ":" + j_s[0:6])
-        index += 1
-    print(bhv_act_test[i] + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s))
+file = r'data/mid_vector.txt'
+with open(file, 'a+') as f:
+
+    for i in range(len(y)):
+        s = []
+        index = 0
+        for j in y[i].tolist():
+            j_s = str(j)
+            if j_s != "0.0" and j > 0.0001:
+                s.append(str(index) + ":" + j_s[0:6])
+            index += 1
+        # print()
+        line=bhv_act_test[i] + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
+        f.write(line + '\n')  # 加\n换行显示
