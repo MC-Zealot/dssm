@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
 import pickle
+import ast
 
 # 配置文件
 conf = Config()
@@ -131,6 +132,11 @@ def cosine_similarity(vector1, vector2):
 
 
 def cosine_similarity(vector_map_1, vector_map_2):
+    vector_map_1 = "{" + vector_map_1 + "}"
+    vector_map_2 = "{" + vector_map_2 + "}"
+    vector_map_1 = ast.literal_eval(vector_map_1)
+    vector_map_2 = ast.literal_eval(vector_map_2)
+
     dot_product = 0.0
     normA = 0.0
     normB = 0.0
@@ -151,3 +157,4 @@ def cosine_similarity(vector_map_1, vector_map_2):
 
 if __name__ == '__main__':
     print("hello")
+    print (ast.literal_eval("{'0' : '0.041', '2' : '0.837'}"))
