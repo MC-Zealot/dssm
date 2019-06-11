@@ -75,7 +75,8 @@ def GetActDat_v2(FileName):
 
     return query, doc, doc_neg
 
-def test1(FileName):
+
+def test1():
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
     file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
@@ -91,16 +92,61 @@ def test1(FileName):
     print("feature_names: ", feature_names)
     print("TRIGRAM_D: ", TRIGRAM_D)
 
+
 def save_vectorizer(vectorizer,path='data/vectorizer_data'):
+    """
+    保存字典文件
+    :param vectorizer:
+    :param path:
+    :return:
+    """
     modelFileSave = open(path, 'wb')
     pickle.dump(vectorizer, modelFileSave)
     modelFileSave.close()
 
 
 def load_vectorizer(path='data/vectorizer_data'):
+    """
+    加载字典文件
+    :param path:
+    :return:
+    """
     modelFileLoad = open(path, 'rb')
     vec = pickle.load(modelFileLoad)
     return vec
+
+
+def cosine_similarity(vector1, vector2):
+    dot_product = 0.0
+    normA = 0.0
+    normB = 0.0
+    for a, b in zip(vector1, vector2):
+        dot_product += a * b
+        normA += a ** 2
+        normB += b ** 2
+    if normA == 0.0 or normB == 0.0:
+        return 0
+    else:
+        return round(dot_product / ((normA**0.5)*(normB**0.5)) * 100, 2)
+
+
+def cosine_similarity(vector_map_1, vector_map_2):
+    dot_product = 0.0
+    normA = 0.0
+    normB = 0.0
+
+    for index,value in vector_map_1:
+        if vector_map_2[index] is not None:
+            dot_product += vector_map_1[index] * vector_map_2[index]
+            normA += vector_map_1[index] ** 2
+            normB += vector_map_2[index] ** 2
+
+    if normA == 0.0 or normB == 0.0:
+        return 0
+    else:
+        return round(dot_product / ((normA**0.5)*(normB**0.5)) * 100, 2)
+
+
 
 
 if __name__ == '__main__':
