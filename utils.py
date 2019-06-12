@@ -198,3 +198,7 @@ def cosine_similarity(vector_map_1, vector_map_2):
 if __name__ == '__main__':
     print("hello")
     print (ast.literal_eval("{'0' : '0.041', '2' : '0.837'}"))
+    #1、打开query文件，加载数据到list[dict]中，
+    #2、打开doc文件，加载数据到list[dict]中，
+    #3、根据index选择query-docs
+    #4、分别计算相似度并且打分，打印出来
