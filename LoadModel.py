@@ -102,7 +102,7 @@ print("doc_neg_y:", doc_neg_y[0][:10], ", len: ", len(doc_neg_y), ", d: ", len(d
 print("query_norm_single:", query_norm_single[0], ", len: ", len(query_norm_single), ", d: ", len(query_norm_single[0]))
 # exit(0)
 
-y_mid_vector_file = conf.y_mid_vector_file
+y_mid_vector_file = conf.query_mid_vector_file
 with open(y_mid_vector_file, 'a+') as f:
 
     for i in range(len(y)):
