@@ -102,8 +102,8 @@ print("doc_neg_y:", doc_neg_y[0][:10], ", len: ", len(doc_neg_y), ", d: ", len(d
 print("query_norm_single:", query_norm_single[0], ", len: ", len(query_norm_single), ", d: ", len(query_norm_single[0]))
 # exit(0)
 
-file = r'data/y_mid_vector.txt'
-with open(file, 'a+') as f:
+y_mid_vector_file = conf.y_mid_vector_file
+with open(y_mid_vector_file, 'a+') as f:
 
     for i in range(len(y)):
         s = []
@@ -117,8 +117,8 @@ with open(file, 'a+') as f:
         line= query_test[i].replace(" ","") + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
 
-file = r'data/doc_pos_y_mid_vector.txt'
-with open(file, 'a+') as f:
+doc_pos_y_mid_vector_file = conf.doc_pos_y_mid_vector_file
+with open(doc_pos_y_mid_vector_file, 'a+') as f:
 
     for i in range(len(doc_pos_y)):
         s = []
@@ -132,8 +132,8 @@ with open(file, 'a+') as f:
         line = doc_test[i].replace(" ","") + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
 
-file = r'data/doc_neg_y_mid_vector.txt'
-with open(file, 'a+') as f:
+doc_neg_y_mid_vector_file = conf.doc_neg_y_mid_vector_file
+with open(doc_neg_y_mid_vector_file, 'a+') as f:
 
     for i in range(len(doc_neg_y)):
         s = []

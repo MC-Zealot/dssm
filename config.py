@@ -38,6 +38,9 @@ class Config(object):
     NEG = 4
     # query batch size
     query_BS = 512
+    y_mid_vector_file = r'data/y_mid_vector.txt'
+    doc_pos_y_mid_vector_file = r'data/doc_pos_y_mid_vector.txt'
+    doc_neg_y_mid_vector_file = r'data/doc_neg_y_mid_vector.txt'
 
 
 if __name__ == '__main__':
