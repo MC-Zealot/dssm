@@ -199,6 +199,24 @@ if __name__ == '__main__':
     print("hello")
     print (ast.literal_eval("{'0' : '0.041', '2' : '0.837'}"))
     #1、打开query文件，加载数据到list[dict]中，
-    #2、打开doc文件，加载数据到list[dict]中，
+    #2、打开doc_neg文件，加载数据到list[dict]中，
     #3、根据index选择query-docs
     #4、分别计算相似度并且打分，打印出来
+    query_list = []
+    doc_list = []
+    query_file_name= conf.query_mid_vector_file
+    doc_neg_y_mid_vector_file_name= conf.doc_neg_y_mid_vector_file
+    with open(query_file_name, encoding='utf8') as f:
+        for line in f.readlines():
+            query_str,norm,query_vec = line.strip().split('\t')
+            query_list.append({query_str:query_vec})
+            print (query_str,": ",query_vec)
+
+    with open(doc_neg_y_mid_vector_file_name, encoding='utf8') as f:
+        for line in f.readlines():
+            doc_str,doc_vec = line.strip().split('\t')
+            doc_list.append({doc_str: doc_vec})
+
+    print ("query_list len:",len(query_list),", shape: ",np.shape(query_list))
+    print ("doc_list len:",len(doc_list),", shape: ",np.shape(doc_list[0]))
+
