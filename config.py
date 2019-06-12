@@ -36,6 +36,8 @@ class Config(object):
     gpu = 0
     # negative sample
     NEG = 4
+    # query batch size
+    query_BS = 512
 
 
 if __name__ == '__main__':
