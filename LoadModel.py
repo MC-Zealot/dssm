@@ -10,7 +10,7 @@ saver.restore(sess, tf.train.latest_checkpoint('./model'))
 
 vectorizer = utils.load_vectorizer()#字典
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
-query_test, doc_test, doc_neg_test = utils.GetActDat_v2(conf.file_vali)
+query_test, doc_test, doc_neg_test = utils.GetActDat(conf.file_vali)
 query_test = query_test[:conf.query_BS]
 doc_test = doc_test[:conf.query_BS]
 doc_neg_test = doc_neg_test[:conf.query_BS * conf.NEG]
@@ -114,7 +114,7 @@ with open(file, 'a+') as f:
                 s.append(str(index) + ":" + j_s[0:6])
             index += 1
         # print()
-        line= query_test[i] + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
+        line= query_test[i].replace(" ","") + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
 
 file = r'data/doc_pos_y_mid_vector.txt'
@@ -129,7 +129,7 @@ with open(file, 'a+') as f:
                 s.append(str(index) + ":" + j_s[0:6])
             index += 1
         # print()
-        line = doc_test[i] + "\t" + ",".join(s)
+        line = doc_test[i].replace(" ","") + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
 
 file = r'data/doc_neg_y_mid_vector.txt'
@@ -144,5 +144,5 @@ with open(file, 'a+') as f:
                 s.append(str(index) + ":" + j_s[0:6])
             index += 1
         # print()
-        line = doc_neg_test[i] + "\t" + ",".join(s)
+        line = doc_neg_test[i].replace(" ","") + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
