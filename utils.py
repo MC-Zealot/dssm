@@ -237,9 +237,9 @@ if __name__ == '__main__':
     print ("query_list len:",len(query_list),", shape: ",np.shape(query_list))
     print ("doc_list len:",len(doc_list),", shape: ",np.shape(doc_list))
 
-    index = 0
+    index = 1
     query=query_list[index]
-    docs=doc_list[index:index+conf.NEG]
+    docs=doc_list[index*conf.NEG:index*conf.NEG+conf.NEG]
     print("query len:", len(query), ", shape: ", query)
     print("docs len:", len(docs), ", shape: ", docs)
     print("docs[1]",docs[1])
