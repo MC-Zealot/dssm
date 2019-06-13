@@ -252,6 +252,3 @@ if __name__ == '__main__':
         print("doc_index_str:", doc_index_str)
         print("score: ", score)
         print("=====================")
-
-
-
