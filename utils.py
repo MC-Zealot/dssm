@@ -173,13 +173,10 @@ def cosine_similarity(vector1, vector2):
 
 
 def cosine_similarity(vector_map_1, vector_map_2):
-    # vector_map_1 = "{" + vector_map_1 + "}"
-    # vector_map_2 = "{" + vector_map_2 + "}"
-    print("vector_map_1: ", vector_map_1)
-    print("vector_map_2: ", vector_map_2)
-    # vector_map_1 = ast.literal_eval(vector_map_1)
+
+    print("query vector_map: ", vector_map_2)
+    print("doc vector_map: ", vector_map_1)
     vector_map_1 = str_to_dict(vector_map_1)
-    # vector_map_2 = ast.literal_eval(vector_map_2)
     vector_map_2 = str_to_dict(vector_map_2)
 
     dot_product = 0.0
@@ -212,8 +209,6 @@ def str_to_dict(str):
 
 if __name__ == '__main__':
     print("hello")
-    print (ast.literal_eval("{'0' : '0.041', '2' : '0.837'}"))
-    print(str_to_dict("4:0.2597,6:4.4728,7:0.0775"))
     # exit(0)
     #1、打开query文件，加载数据到list[dict]中，
     #2、打开doc_neg文件，加载数据到list[dict]中，
@@ -234,12 +229,12 @@ if __name__ == '__main__':
             doc_str,doc_vec = line.strip().split('\t')
             doc_list.append((doc_str, doc_vec))
 
-    print ("query_list len:",len(query_list),", shape: ",np.shape(query_list))
-    print ("doc_list len:",len(doc_list),", shape: ",np.shape(doc_list))
+    print("query_list len:",len(query_list),", shape: ", np.shape(query_list))
+    print("doc_list len:",len(doc_list), ", shape: ", np.shape(doc_list))
 
     index = 1
-    query=query_list[index]
-    docs=doc_list[index*conf.NEG:index*conf.NEG+conf.NEG]
+    query = query_list[index]
+    docs = doc_list[index*conf.NEG:index*conf.NEG+conf.NEG]
     print("query len:", len(query), ", shape: ", query)
     print("docs len:", len(docs), ", shape: ", docs)
     print("docs[1]",docs[1])
@@ -253,8 +248,8 @@ if __name__ == '__main__':
         query_index_str = query[0]
 
         score = cosine_similarity(doc_index_vec,query_index_vec)
-        print("doc_index_str:", doc_index_str)
         print("query_index_str:", query_index_str)
+        print("doc_index_str:", doc_index_str)
         print("score: ", score)
         print("=====================")
 
