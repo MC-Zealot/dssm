@@ -21,7 +21,7 @@ class Config(object):
     #vocab_path = '/Users/Zealot/yizhou/yizhou/git/dssm/data/vocab.txt'
     vocab_path = './data/vocab.txt'
     # vocab_path = './data/vocab_filtered.txt'
-    file_train = './data/oppo_round1_train_20180929_mini.txt'
+    file_train = './data/oppo_round1_train_20180929_mini_test.txt'
     # file_train = './data/oppo_round1_train_20180929.txt'
     #file_train = './data/oppo_round1_train_20180929_2.txt'
     file_vali = './data/oppo_round1_vali_20180929_mini.txt'
@@ -37,7 +37,7 @@ class Config(object):
     # negative sample
     NEG = 4
     # query batch size
-    query_BS = 512
+    query_BS = 128
     query_mid_vector_file = r'data/y_mid_vector.txt'
     doc_pos_y_mid_vector_file = r'data/doc_pos_y_mid_vector.txt'
     doc_neg_y_mid_vector_file = r'data/doc_neg_y_mid_vector.txt'

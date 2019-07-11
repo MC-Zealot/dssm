@@ -122,17 +122,23 @@ def test1():
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
     file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
-    bhv_act, ad_act, ac_act_neg = GetActDat_v2(file_train)
+    bhv_act, ad_act, ad_act_neg = GetActDat_v2(file_train)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
-    bhv_act = set(bhv_act)
+    # bhv_act = set(bhv_act)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
     vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
     # vectorizer = CountVectorizer()
+    # vectorizer.fit(ad_act + bhv_act + ad_act_neg)
     vectorizer.fit(bhv_act)
     feature_names = vectorizer.get_feature_names()
     TRIGRAM_D = len(feature_names)  # 词库大小，aka 稀疏矩阵列数
     print("feature_names: ", feature_names)
     print("TRIGRAM_D: ", TRIGRAM_D)
+    query_train_dat = vectorizer.transform(bhv_act)
+    i=0
+
+    # print(field for field in bhv_act[i])
+    print( "bhv_act["+str(i)+"]",bhv_act[i], "query_train_dat["+str(i)+"]",query_train_dat[i])
 
 
 def save_vectorizer(vectorizer,path='data/vectorizer_data'):
@@ -207,37 +213,35 @@ def str_to_dict(str):
     return dict
 
 
-if __name__ == '__main__':
-    print("hello")
-    # exit(0)
-    #1、打开query文件，加载数据到list[dict]中，
-    #2、打开doc_neg文件，加载数据到list[dict]中，
-    #3、根据index选择query-docs
-    #4、分别计算相似度并且打分，打印出来
+def test_case_for_cal_similarity():
+    # 1、打开query文件，加载数据到list[dict]中，
+    # 2、打开doc_neg文件，加载数据到list[dict]中，
+    # 3、根据index选择query-docs
+    # 4、分别计算相似度并且打分，打印出来
     query_list = []
     doc_list = []
-    query_file_name= conf.query_mid_vector_file
-    doc_neg_y_mid_vector_file_name= conf.doc_neg_y_mid_vector_file
+    query_file_name = conf.query_mid_vector_file
+    doc_neg_y_mid_vector_file_name = conf.doc_neg_y_mid_vector_file
     with open(query_file_name, encoding='utf8') as f:
         for line in f.readlines():
-            query_str,norm,query_vec = line.strip().split('\t')
-            query_list.append((query_str,query_vec))
+            query_str, norm, query_vec = line.strip().split('\t')
+            query_list.append((query_str, query_vec))
             # print (query_str,": ",query_vec)
 
     with open(doc_neg_y_mid_vector_file_name, encoding='utf8') as f:
         for line in f.readlines():
-            doc_str,doc_vec = line.strip().split('\t')
+            doc_str, doc_vec = line.strip().split('\t')
             doc_list.append((doc_str, doc_vec))
 
-    print("query_list len:",len(query_list),", shape: ", np.shape(query_list))
-    print("doc_list len:",len(doc_list), ", shape: ", np.shape(doc_list))
+    print("query_list len:", len(query_list), ", shape: ", np.shape(query_list))
+    print("doc_list len:", len(doc_list), ", shape: ", np.shape(doc_list))
 
     index = 1
     query = query_list[index]
-    docs = doc_list[index*conf.NEG:index*conf.NEG+conf.NEG]
+    docs = doc_list[index * conf.NEG:index * conf.NEG + conf.NEG]
     print("query len:", len(query), ", shape: ", query)
     print("docs len:", len(docs), ", shape: ", docs)
-    print("docs[1]",docs[1])
+    print("docs[1]", docs[1])
     # exit(0)
     print("===================================================================")
     for i in range(len(docs)):
@@ -247,8 +251,14 @@ if __name__ == '__main__':
         query_index_vec = query[1]
         query_index_str = query[0]
 
-        score = cosine_similarity(doc_index_vec,query_index_vec)
+        score = cosine_similarity(doc_index_vec, query_index_vec)
         print("query_index_str:", query_index_str)
         print("doc_index_str:", doc_index_str)
         print("score: ", score)
         print("=====================")
+
+
+if __name__ == '__main__':
+    print("hello")
+    # exit(0)
+    test1()
