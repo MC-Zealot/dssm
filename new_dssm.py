@@ -270,14 +270,14 @@ with tf.Session(config=config) as sess:
 
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            print("train_loss epoch:", epoch, ", i: ", i,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
             sess.run(auc_op, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             auc_v=sess.run(auc_value, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_auc += auc_v
 
-
+            # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
+            print("epoch: ", epoch,", train_epoch_steps: ", i,", train_loss: ", loss_v,", auc: ", auc_v)
 
 
         epoch_loss /= (train_epoch_steps)
@@ -289,12 +289,23 @@ with tf.Session(config=config) as sess:
         # test loss
         start = time.time()
         epoch_loss = 0
+        epoch_auc = 0
         for index in range(vali_epoch_steps):
             # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
+            # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
+
+            sess.run(auc_op, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS,
+                                                query_batch, doc_positive_batch, doc_negative_batch, on_train))
+            auc_v = sess.run(auc_value, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
+                                                        query_BS, query_batch, doc_positive_batch, doc_negative_batch,
+                                                        on_train))
+            epoch_auc += auc_v
+
+            # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
+            print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
         train_writer.add_summary(test_loss, epoch + 1)
