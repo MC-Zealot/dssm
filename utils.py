@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 import pickle
 import ast
 import json
+import random
 
 # 配置文件
 conf = Config()
@@ -52,6 +53,7 @@ def GetActDat_v2(FileName):
             if len(spline) < 4:
                 continue
             prefix, query_pred, title, tag, label = spline
+
             if label == '0':
                 continue
             # query.append(prefix)
@@ -120,7 +122,7 @@ def GetActDat(FileName):
 
 def get_data_set(FileName):
     """
-1、查看query结构
+1、查看query结构，字符串，句子每个字以空格为分隔符，uni term
 2、查看doc正例与负例结构
 3、先计算正例（保持不变）
 4、再通过正例，随机选择NEG个当做负例。
@@ -138,23 +140,22 @@ def get_data_set(FileName):
             prefix, query_pred, title, tag, label = spline
             if label == '0':
                 continue
-            cur_arr = []
-            query_pred = json.loads(query_pred)
-            # only 4 negative sample
-            for each in query_pred:  # 从预测的query中，找4个负例
-                if each == title:
-                    continue
-                each = [i for i in each]
-                each = " ".join(each)
-                cur_arr.append(each)
-            if len(cur_arr) >= 4:
-                prefix = [i for i in prefix]
-                title = [i for i in title]
-                prefix = " ".join(prefix)
-                title = " ".join(title)
-                query.append(prefix)
-                doc.append(title)
-                doc_neg.extend(cur_arr[:conf.NEG])
+            prefix = [i for i in prefix]
+            title = [i for i in title]
+            prefix = " ".join(prefix)
+            title = " ".join(title)
+            query.append(prefix)
+            doc.append(title)
+            # doc_neg.extend(cur_arr[:conf.NEG])
+    size = len(doc)
+    for i in range(size):
+        print(doc[i])
+        for j in range(conf.NEG):
+            r = random.random()
+            r = int(r * size)
+            doc_neg.append(doc[r])
+
+
 
     return query, doc, doc_neg
 
