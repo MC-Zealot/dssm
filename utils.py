@@ -120,7 +120,10 @@ def GetActDat(FileName):
 
 def get_data_set(FileName):
     """
-
+1、查看query结构
+2、查看doc正例与负例结构
+3、先计算正例（保持不变）
+4、再通过正例，随机选择NEG个当做负例。
     :param FileName:
     :return:query, doc, doc_neg
     """
@@ -135,8 +138,6 @@ def get_data_set(FileName):
             prefix, query_pred, title, tag, label = spline
             if label == '0':
                 continue
-            # query.append(prefix)
-            # doc.append(title)
             cur_arr = []
             query_pred = json.loads(query_pred)
             # only 4 negative sample
@@ -145,7 +146,6 @@ def get_data_set(FileName):
                     continue
                 each = [i for i in each]
                 each = " ".join(each)
-                # print ("each: ", each)
                 cur_arr.append(each)
             if len(cur_arr) >= 4:
                 prefix = [i for i in prefix]
