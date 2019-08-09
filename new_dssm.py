@@ -307,10 +307,11 @@ with tf.Session(config=config) as sess:
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
             print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
         epoch_loss /= (vali_epoch_steps)
+        epoch_auc /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
         train_writer.add_summary(test_loss, epoch + 1)
         # test_writer.add_summary(test_loss, step + 1)
-        print("Epoch #%d | Test  Loss: %-4.3f | Calc_LossTime: %-3.3fs" % (epoch, epoch_loss, start - end))
+        print("Epoch #%d | Test  Loss: %-4.3f | Test Auc: %-4.3f| Calc_LossTime: %-3.3fs" % (epoch, epoch_loss,epoch_auc, start - end))
 
     # 保存模型
     save_path = saver.save(sess, "model/model_1.ckpt")
