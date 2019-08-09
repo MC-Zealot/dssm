@@ -118,6 +118,47 @@ def GetActDat(FileName):
     return query, doc, doc_neg
 
 
+def get_data_set(FileName):
+    """
+
+    :param FileName:
+    :return:query, doc, doc_neg
+    """
+    query = []
+    doc = []
+    doc_neg = []
+    with open(FileName, encoding='utf8') as f:
+        for line in f.readlines():
+            spline = line.strip().split('\t')
+            if len(spline) < 4:
+                continue
+            prefix, query_pred, title, tag, label = spline
+            if label == '0':
+                continue
+            # query.append(prefix)
+            # doc.append(title)
+            cur_arr = []
+            query_pred = json.loads(query_pred)
+            # only 4 negative sample
+            for each in query_pred:  # 从预测的query中，找4个负例
+                if each == title:
+                    continue
+                each = [i for i in each]
+                each = " ".join(each)
+                # print ("each: ", each)
+                cur_arr.append(each)
+            if len(cur_arr) >= 4:
+                prefix = [i for i in prefix]
+                title = [i for i in title]
+                prefix = " ".join(prefix)
+                title = " ".join(title)
+                query.append(prefix)
+                doc.append(title)
+                doc_neg.extend(cur_arr[:conf.NEG])
+
+    return query, doc, doc_neg
+
+
 def test1():
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
