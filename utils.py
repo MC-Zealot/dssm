@@ -122,7 +122,7 @@ def GetActDat(FileName):
 
 def get_data_set(FileName):
     """
-1、查看query结构，字符串，句子每个字以空格为分隔符，uni term
+1、查看query结构，字符串，句子每个字以空格为分隔符，uni gram
 2、查看doc正例与负例结构
 3、先计算正例（保持不变）
 4、再通过正例，随机选择NEG个当做负例。
@@ -149,13 +149,11 @@ def get_data_set(FileName):
             # doc_neg.extend(cur_arr[:conf.NEG])
     size = len(doc)
     for i in range(size):
-        print(doc[i])
+        # print(doc[i])
         for j in range(conf.NEG):
             r = random.random()
             r = int(r * size)
             doc_neg.append(doc[r])
-
-
 
     return query, doc, doc_neg
 
