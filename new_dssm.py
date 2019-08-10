@@ -277,7 +277,7 @@ with tf.Session(config=config) as sess:
             epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
-            print("epoch: ", epoch,", train_epoch_steps: ", i,", train_loss: ", loss_v,", auc: ", auc_v)
+        #    print("epoch: ", epoch,", train_epoch_steps: ", i,", train_loss: ", loss_v,", auc: ", auc_v)
 
 
         epoch_loss /= (train_epoch_steps)
@@ -305,7 +305,7 @@ with tf.Session(config=config) as sess:
             epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
-            print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
+#            print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
         epoch_loss /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
         train_writer.add_summary(test_loss, epoch + 1)
