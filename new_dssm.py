@@ -30,8 +30,9 @@ query_BS = conf.query_BS
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
-bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
+bhv_act, ad_act, ad_act_neg = utils.get_data_set(conf.file_train)
+# exit(0)
+bhv_act_test, ad_act_test, ad_act_neg_test  = utils.get_data_set(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
@@ -307,10 +308,11 @@ with tf.Session(config=config) as sess:
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
 #            print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
         epoch_loss /= (vali_epoch_steps)
+        epoch_auc /= (vali_epoch_steps)
         test_loss = sess.run(loss_summary, feed_dict={average_loss: epoch_loss})
         train_writer.add_summary(test_loss, epoch + 1)
         # test_writer.add_summary(test_loss, step + 1)
-        print("Epoch #%d | Test  Loss: %-4.3f | Calc_LossTime: %-3.3fs" % (epoch, epoch_loss, start - end))
+        print("Epoch #%d | Test  Loss: %-4.3f | Test Auc: %-4.3f| Calc_LossTime: %-3.3fs" % (epoch, epoch_loss,epoch_auc, start - end))
 
     # 保存模型
     save_path = saver.save(sess, "model/model_1.ckpt")
