@@ -30,9 +30,11 @@ query_BS = conf.query_BS
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act, ad_act_neg = utils.get_data_set(conf.file_train)
+# bhv_act, ad_act, ad_act_neg = utils.get_data_set(conf.file_train)
+bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
 # exit(0)
-bhv_act_test, ad_act_test, ad_act_neg_test  = utils.get_data_set(conf.file_vali)
+# bhv_act_test, ad_act_test, ad_act_neg_test  = utils.get_data_set(conf.file_vali)
+bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
@@ -253,6 +255,7 @@ with tf.Session(config=config) as sess:
 
     start = time.time()
     for epoch in range(conf.num_epoch):
+        utils.view_bar("processing image of ", epoch + 1, conf.num_epoch)
         batch_ids = [i for i in range(train_epoch_steps)]
         # print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)

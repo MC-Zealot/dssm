@@ -6,9 +6,10 @@ import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
 import pickle
-import ast
 import json
 import random
+import math
+import sys
 
 # 配置文件
 conf = Config()
@@ -297,6 +298,14 @@ def test_case_for_cal_similarity():
         print("score: ", score)
         print("=====================")
 
+def view_bar(message, num, total):
+    rate = num / total
+    rate_num = int(rate * 40)
+    rate_nums = math.ceil(rate * 100)
+    r = '\r%s:[%s%s]%d%%\t%d/%d' % (message, ">" * rate_num, " " * (40 - rate_num), rate_nums, num, total,)
+    sys.stdout.write(r)
+    sys.stdout.flush()
+    print()
 
 if __name__ == '__main__':
     print("hello")
