@@ -277,7 +277,7 @@ def test_case_for_cal_similarity():
     print("query_list len:", len(query_list), ", shape: ", np.shape(query_list))
     print("doc_list len:", len(doc_list), ", shape: ", np.shape(doc_list))
 
-    index = 1
+    index = 4
     query = query_list[index]
     docs = doc_list[index * conf.NEG:index * conf.NEG + conf.NEG]
     print("query len:", len(query), ", shape: ", query)
@@ -309,5 +309,4 @@ def view_bar(message, num, total):
 
 if __name__ == '__main__':
     print("hello")
-    # exit(0)
-    test1()
+    test_case_for_cal_similarity()
