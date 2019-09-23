@@ -31,13 +31,13 @@ class Config(object):
     use_stack_rnn = False
     learning_rate = 0.01
     # max_steps = 8000
-    num_epoch = 30
+    num_epoch = 5
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
     NEG = 4
     # query batch size
-    query_BS = 512
+    query_BS = 1024
     query_mid_vector_file = r'data/y_mid_vector.txt'
     doc_pos_y_mid_vector_file = r'data/doc_pos_y_mid_vector.txt'
     doc_neg_y_mid_vector_file = r'data/doc_neg_y_mid_vector.txt'
