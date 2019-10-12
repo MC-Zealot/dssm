@@ -31,7 +31,7 @@ class Config(object):
     use_stack_rnn = False
     learning_rate = 0.01
     # max_steps = 8000
-    num_epoch = 5
+    num_epoch = 4
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
