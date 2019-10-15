@@ -10,7 +10,8 @@ saver.restore(sess, tf.train.latest_checkpoint('./model'))
 
 vectorizer = utils.load_vectorizer()#字典
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
-query_test, doc_test, doc_neg_test = utils.GetActDat(conf.file_vali)
+# query_test, doc_test, doc_neg_test = utils.GetActDat(conf.file_vali)
+query_test, doc_test, doc_neg_test = utils.get_data_set_comment(conf.file_vali)
 query_test = query_test[:conf.query_BS]
 doc_test = doc_test[:conf.query_BS]
 doc_neg_test = doc_neg_test[:conf.query_BS * conf.NEG]

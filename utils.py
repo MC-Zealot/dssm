@@ -277,7 +277,7 @@ def test_case_for_cal_similarity():
     print("query_list len:", len(query_list), ", shape: ", np.shape(query_list))
     print("doc_list len:", len(doc_list), ", shape: ", np.shape(doc_list))
 
-    index = 4
+    index = 35
     query = query_list[index]
     docs = doc_list[index * conf.NEG:index * conf.NEG + conf.NEG]
     print("query len:", len(query), ", shape: ", query)
@@ -307,6 +307,50 @@ def view_bar(message, num, total):
     sys.stdout.flush()
     print()
 
+
+def get_data_set_comment(FileName):
+    """
+    评论流数据
+1、查看query（正文博文）结构，字符串，句子每个字以空格为分隔符，uni gram
+2、查看doc（广告博文）正例与负例结构
+3、先计算正例（保持不变）
+4、再通过正例，随机选择NEG个当做负例。
+    :param FileName:
+    :return:query, doc, doc_neg
+    """
+    query = []
+    doc = []
+    doc_neg = []
+    with open(FileName, encoding='utf8') as f:
+        for line in f.readlines():
+            spline = line.strip().split('\t')
+            if len(spline) < 3:
+                continue
+            prefix,  title, label = spline
+            if label == '0':
+                continue
+            prefix = [i for i in prefix]
+            title = [i for i in title]
+            prefix = " ".join(prefix)
+            title = " ".join(title)
+            query.append(prefix)
+            doc.append(title)
+            # doc_neg.extend(cur_arr[:conf.NEG])
+    size = len(doc)
+    for i in range(size):
+        # print(doc[i])
+        for j in range(conf.NEG):
+            r = random.random()
+            r = int(r * size)
+            doc_neg.append(doc[r])
+
+    return query, doc, doc_neg
+
 if __name__ == '__main__':
     print("hello")
     test_case_for_cal_similarity()
+    # file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
+    # query, doc, doc_neg = get_data_set_comment(file_train)
+    # idx = 4
+    # print(query[idx])
+    # print(doc[idx])
