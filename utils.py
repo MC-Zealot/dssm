@@ -324,7 +324,7 @@ def get_data_set_comment(FileName):
     with open(FileName, encoding='utf8') as f:
         for line in f.readlines():
             spline = line.strip().split('\t')
-            if len(spline) != 3:
+            if len(spline) < 3:
                 continue
             prefix,  title, label = spline
             if label == '0':
