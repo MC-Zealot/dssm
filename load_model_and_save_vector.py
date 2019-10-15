@@ -114,7 +114,8 @@ with open(y_mid_vector_file, 'a+') as f:
                 s.append(str(index) + ":" + j_s[0:6])
             index += 1
         # print()
-        line= query_test[i].replace(" ","") + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
+        #line= query_test[i].replace(" ","") + "\t" + str(query_norm_single[i][0]) + "\t" + ",".join(s)
+        line= query_test[i].replace(" ","") + "\t" + ",".join(s)
         f.write(line + '\n')  # 加\n换行显示
 
 doc_pos_y_mid_vector_file = conf.doc_pos_y_mid_vector_file
