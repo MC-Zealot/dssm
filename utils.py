@@ -10,6 +10,7 @@ import json
 import random
 import math
 import sys
+import re
 
 # 配置文件
 conf = Config()
@@ -323,7 +324,8 @@ def get_data_set_comment(FileName):
     doc_neg = []
     with open(FileName, encoding='utf8') as f:
         for line in f.readlines():
-            spline = line.strip().split('\t')
+            line = pre_process(line)
+            spline = line.split('\t')
             if len(spline) < 3:
                 continue
             prefix,  title, label = spline
@@ -346,9 +348,34 @@ def get_data_set_comment(FileName):
 
     return query, doc, doc_neg
 
+
+def pre_process(line):
+    if line is None:
+        return line
+    #去掉两端空白
+    line = line.strip()
+    #判断是否有短链，如果有则去掉
+    reg_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')  # 匹配模式
+    urls = re.findall(reg_pattern, line)
+    if len(urls) != 0:
+        line = line.replace(urls[0], "")
+        for index in range(len(urls)):
+            line = line.replace(urls[index], "")
+    return line
+
+
 if __name__ == '__main__':
     print("hello")
-    test_case_for_cal_similarity()
+    pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')  # 匹配模式
+
+    # str = 'Its after 12 noon, do you know where your rooftops are? '
+    str = '高速车震……速看！！！！http://t.cn/RSNVzD8 ​​	  [馋嘴]玩了几天，这个月的花贝都还上了[弗莱见钱眼开]缺零花钱的可以来玩一下[来] http://t.cn/Eo3OKsf [弗莱见钱眼开][弗莱见钱眼开][弗莱见钱眼开][弗莱见钱眼开]玩每天赚点新闻赚钱辣么多零花钱随便你赚啦[嘻嘻][嘻嘻]	1	4373771843879773	4370362685017799 '
+    print(str)
+    # url = re.findall(pattern, str)
+    # print(url,len(url))
+    # str=str.replace(url[0],"")
+    print(pre_process(str))
+    # test_case_for_cal_similarity()
     # file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
     # query, doc, doc_neg = get_data_set_comment(file_train)
     # idx = 4
