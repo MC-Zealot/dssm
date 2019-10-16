@@ -22,7 +22,7 @@ class Config(object):
     vocab_path = './data/vocab.txt'
     # vocab_path = './data/vocab_filtered.txt'
     # file_train = './data/oppo_round1_train_20180929_mini_test.txt'
-    file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
+    file_train = '/data0/yizhou/boost/pos/dataset/dataset_20191016.txt'
     # file_train = './data/oppo_round1_train_20180929.txt'
     #file_train = './data/oppo_round1_train_20180929_2.txt'
     # file_vali = './data/oppo_round1_vali_20180929_mini.txt'
@@ -33,7 +33,7 @@ class Config(object):
     use_stack_rnn = False
     learning_rate = 0.01
     # max_steps = 8000
-    num_epoch = 4
+    num_epoch = 50
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
