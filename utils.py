@@ -326,7 +326,7 @@ def get_data_set_comment(FileName):
             spline = line.strip().split('\t')
             if len(spline) < 3:
                 continue
-            prefix,  title, label = spline
+            prefix,  title, label, mid, feed_id = spline
             if label == '0':
                 continue
             prefix = [i for i in prefix]
