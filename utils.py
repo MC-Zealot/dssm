@@ -347,14 +347,18 @@ def get_data_set_comment(FileName):
         # print(doc[i])
         j = 0
         pos_content = doc[i]
-        while j < NEG:
+        doc_neg_list=[]#负样本NEG个
+        doc_neg_list=set(doc_neg_list)
+        while j < conf.NEG:
             r = random.random()
 
             r = int(r * size)
             neg_content = doc[r] #随机选择NEG个负样本，如果和正样本ad相同，或者query相同，则pass
-            if pos_content != neg_content and query[i] != query[r]:
-                doc_neg.append(doc[r])
+            if pos_content != neg_content and query[i] != query[r] and neg_content not in doc_neg_list:
+                # doc_neg.append(neg_content)
+                doc_neg_list.add(neg_content)
                 j += 1
+        doc_neg.extend(doc_neg_list)
 
     return query, doc, doc_neg
 
@@ -389,12 +393,13 @@ if __name__ == '__main__':
     # str=str.replace(url[0],"")
     # print(pre_process(str))
     # test_case_for_cal_similarity()
-    # file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
-    # query, doc, doc_neg = get_data_set_comment(file_train)
+    file_train = './data/comment/trainset_20190515_20190521_mini.txt'
+    query, doc, doc_neg = get_data_set_comment(file_train)
+    idx = 0
+    print("query: ",query[idx])
+    print("doc: ",doc[idx])
+    print("doc_neg: ",doc_neg[idx][0])
+    print("doc_neg: ",doc_neg[idx][1])
+    print("doc_neg: ",doc_neg[idx][2])
+    print("doc_neg: ",doc_neg[idx][3])
 
-    NEG=5
-    i = 0
-    while i != NEG:
-
-        print(i)
-        i += 1

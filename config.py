@@ -37,7 +37,7 @@ class Config(object):
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
-    NEG = 1
+    NEG = 4
     # query batch size
     query_BS = 512
     query_mid_vector_file = r'data/y_mid_vector.txt'
