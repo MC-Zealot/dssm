@@ -340,16 +340,21 @@ def get_data_set_comment(FileName):
             title = " ".join(title)
 
             query.append(prefix)
-            print(query)
+            # print(query)
             doc.append(title)
             # doc_neg.extend(cur_arr[:conf.NEG])
     size = len(doc)
     for i in range(size):
         # print(doc[i])
-        for j in range(conf.NEG):
+        j = 0
+        while j < NEG:
             r = random.random()
             r = int(r * size)
-            doc_neg.append(doc[r])
+            neg_content = doc[r] #随机选择NEG个负样本，如果和正样本相同，则pass
+            pos_content = doc[i]
+            if pos_content != neg_content:
+                doc_neg.append(doc[r])
+                j += 1
 
     return query, doc, doc_neg
 
@@ -384,8 +389,12 @@ if __name__ == '__main__':
     # str=str.replace(url[0],"")
     # print(pre_process(str))
     # test_case_for_cal_similarity()
-    file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
-    query, doc, doc_neg = get_data_set_comment(file_train)
-    # idx = 4
-    # print(query[idx])
-    # print(doc[idx])
+    # file_train = './data/comment/dataset20190101_no_extend_no_left.txt'
+    # query, doc, doc_neg = get_data_set_comment(file_train)
+
+    NEG=5
+    i = 0
+    while i != NEG:
+
+        print(i)
+        i += 1
