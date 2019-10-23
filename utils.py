@@ -346,12 +346,13 @@ def get_data_set_comment(FileName):
     for i in range(size):
         # print(doc[i])
         j = 0
+        pos_content = doc[i]
         while j < NEG:
             r = random.random()
+
             r = int(r * size)
-            neg_content = doc[r] #随机选择NEG个负样本，如果和正样本相同，则pass
-            pos_content = doc[i]
-            if pos_content != neg_content:
+            neg_content = doc[r] #随机选择NEG个负样本，如果和正样本ad相同，或者query相同，则pass
+            if pos_content != neg_content and query[i] != query[r]:
                 doc_neg.append(doc[r])
                 j += 1
 
