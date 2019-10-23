@@ -328,7 +328,7 @@ def get_data_set_comment(FileName):
             spline = line.split('\t')
             if len(spline) < 3:
                 continue
-            prefix,  title, label = spline
+            prefix,  title, label, mid, feed_id = spline
             if label == '0':
                 continue
             prefix = pre_process(prefix)
@@ -340,7 +340,6 @@ def get_data_set_comment(FileName):
             title = " ".join(title)
 
             query.append(prefix)
-            # print(query)
             doc.append(title)
             # doc_neg.extend(cur_arr[:conf.NEG])
     size = len(doc)
