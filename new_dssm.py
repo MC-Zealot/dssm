@@ -227,6 +227,11 @@ with tf.name_scope('Accuracy'):
     tf.summary.scalar('accuracy', accuracy)
 
 with tf.name_scope('Auc'):
+    # insert by trobr
+    indices = tf.squeeze(tf.where(tf.less_equal(label_tensor, 2 - 1)), 1)
+    label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
+    predictions = tf.gather(cos_sim_raw, indices)
+    # end of insert
     auc_value, auc_op = tf.metrics.auc(label_tensor, cos_sim_raw, num_thresholds=2000)
     tf.summary.scalar('auc', auc_value)
 
