@@ -329,7 +329,7 @@ def get_data_set_comment(FileName):
             if len(spline) < 3:
                 continue
             prefix,  title, label, mid, feed_id = spline
-            if label == '0':
+            if label != '1':
                 continue
             prefix = pre_process(prefix)
             title = pre_process(title)
