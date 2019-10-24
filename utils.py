@@ -330,6 +330,7 @@ def get_data_set_comment(FileName):
                 continue
             prefix,  title, label, mid, feed_id = spline
             if label != '1':
+                print("wrong label:", line)
                 continue
             prefix = pre_process(prefix)
             title = pre_process(title)
