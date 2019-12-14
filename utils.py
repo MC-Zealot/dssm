@@ -245,7 +245,7 @@ def cosine_similarity(vector_map_1, vector_map_2):
 
 def str_to_dict(str):
     # print("str: ",str)
-    dict={}
+    dict = {}
     if str is None or str == "":
         return dict
     fields = str.split(",")
@@ -298,6 +298,7 @@ def test_case_for_cal_similarity():
         print("doc_index_str:", doc_index_str)
         print("score: ", score)
         print("=====================")
+
 
 def view_bar(message, num, total):
     rate = num / total
