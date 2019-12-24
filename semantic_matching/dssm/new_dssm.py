@@ -13,6 +13,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 start = time.time()
 
 conf = Config()
+hyper_params = conf.__dict__
+for key in hyper_params:
+    print(str(key) + ": " + str(hyper_params[key]))
 print("conf: ",conf.__dict__)
 query_BS = conf.query_BS
 L1_N = conf.L1_N

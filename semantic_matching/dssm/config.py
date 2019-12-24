@@ -13,9 +13,6 @@ def load_vocab(file_path):
 
 class Config(object):
     def __init__(self):
-        self.vocab_map = load_vocab(self.vocab_path)
-        self.nwords = len(self.vocab_map)
-
         self.vocab_path = '../../data/vocab.txt'
         # file_train = '../../data/dataset_20190508_20190514_2w.txt'
         self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
