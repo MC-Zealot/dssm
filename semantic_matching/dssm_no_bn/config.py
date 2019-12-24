@@ -13,30 +13,26 @@ def load_vocab(file_path):
 
 class Config(object):
     def __init__(self):
-        self.vocab_map = load_vocab(self.vocab_path)
-        self.nwords = len(self.vocab_map)
+        self.vocab_path = '../../data/vocab.txt'
+        self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
+        self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
+        self.L1_N = 1000
+        self.L2_N = 300
+        self.query_BS = 512
+        self.learning_rate = 0.1
+        self.num_epoch = 10
+        self.summaries_dir = './Summaries/'
+        self.gpu = 0
+        # negative sample
+        self.NEG = 4
+        # query batch size
 
-    vocab_path = '../../data/vocab.txt'
-    file_train = '../../data/dataset_20190508_20190514_2w.txt'
-    file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
-
-    L1_N = 1000
-    L2_N = 300
-    query_BS = 512
-    learning_rate = 0.1
-    num_epoch = 10
-    summaries_dir = './Summaries/'
-    gpu = 0
-    # negative sample
-    NEG = 4
-    # query batch size
-
-    query_mid_vector_file = r'output/y_mid_vector.txt'
-    doc_pos_y_mid_vector_file = r'output/doc_pos_y_mid_vector.txt'
-    doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
-    max_seq_len = 10
-    hidden_size_rnn = 100
-    use_stack_rnn = False
+        self.query_mid_vector_file = r'output/y_mid_vector.txt'
+        self.doc_pos_y_mid_vector_file = r'output/doc_pos_y_mid_vector.txt'
+        self.doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
+        self.max_seq_len = 10
+        self.hidden_size_rnn = 100
+        self.use_stack_rnn = False
 
 
 if __name__ == '__main__':
