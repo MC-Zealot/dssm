@@ -4,7 +4,7 @@ python=3.6
 TensorFlow=1.6
 """
 import sys
-sys.path.append("../utils")
+# sys.path.append("../utils")
 import time
 from utils.utils import *
 from semantic_matching.dssm.config import Config
