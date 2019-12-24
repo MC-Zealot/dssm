@@ -53,15 +53,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-
-
-
-import tf_ranking_utils as utils
-
-
-
-
-
+from utils import tf_ranking_utils as utils
 
 
 class RankingMetricKey(object):

@@ -1,8 +1,7 @@
 import math
 import tensorflow as tf
 import numpy as np
-import metrics
-
+from utils import metrics
 
 '''
 ref: https://en.wikipedia.org/wiki/Discounted_cumulative_gain
@@ -48,7 +47,7 @@ ideal = None
 tensor_rel_scores = tf.convert_to_tensor(rel_scores)
 tensor_rel_scores_float = tf.cast(tensor_rel_scores, tf.float32)
 
-ndcg_out=metrics.normalized_discounted_cumulative_gain(tensor_rel_scores_float, tensor_rel_scores_float)
+ndcg_out= metrics.normalized_discounted_cumulative_gain(tensor_rel_scores_float, tensor_rel_scores_float)
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     # a = sess.run(ndcg_out)

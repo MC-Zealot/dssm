@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding=utf-8
 import json
-from config import Config
+from semantic_matching.dssm.config import Config
 import numpy as np
 from scipy.sparse import csr_matrix
 

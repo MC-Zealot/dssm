@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding=utf-8
-import json
-from config import Config
+from semantic_matching.dssm.config import Config
 import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
@@ -183,7 +182,7 @@ def test1():
     print( "bhv_act["+str(i)+"]",bhv_act[i], "query_train_dat["+str(i)+"]",query_train_dat[i])
 
 
-def save_vectorizer(vectorizer,path='data/vectorizer_data'):
+def save_vectorizer(vectorizer,path='../../data/vectorizer_data'):
     """
     保存字典文件
     :param vectorizer:
