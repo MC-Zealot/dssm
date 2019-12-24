@@ -17,16 +17,17 @@ class Config(object):
         self.nwords = len(self.vocab_map)
 
         self.vocab_path = '../../data/vocab.txt'
-        # file_train = '../../data/dataset_20190508_20190514_2w.txt'
-        self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
-        self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
+        self.file_train = '../../data/trainset_repeat_20190508_20190514_shuffle.txt'
+        #self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
+        #self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
+        self.file_vali = '../../data/testset_repeat_20190515_20190515_shuffle.txt'
         # query batch size
-        self.query_BS = 512
+        self.query_BS = 256
         self.L1_N = 1000
         self.L2_N = 300
 
-        self.learning_rate = 0.1
-        self.num_epoch = 45
+        self.learning_rate = 0.00001
+        self.num_epoch = 40
         self.summaries_dir = './Summaries/'
         self.gpu = 0
         # negative sample
