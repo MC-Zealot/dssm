@@ -21,12 +21,13 @@ start = time.time()
 
 # batch size
 
-L1_N = 1000
-L2_N = 300
+
 
 # 读取数据
 conf = Config()
 query_BS = conf.query_BS
+L1_N = conf.L1_N
+L2_N = conf.L2_N
 
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors

@@ -12,21 +12,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 start = time.time()
 
-
-# query batch size
-
-# batch size
-
-L1_N = 1000
-L2_N = 300
-
-# 读取数据
 conf = Config()
+print("conf: ", conf)
 query_BS = conf.query_BS
+L1_N = conf.L1_N
+L2_N = conf.L2_N
 
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
-
+# 读取数据
 bhv_act, ad_act, ad_act_neg = get_data_set_comment(conf.file_train)
 # bhv_act, ad_act, ad_act_neg = GetActDat_v2(conf.file_train)
 # exit(0)

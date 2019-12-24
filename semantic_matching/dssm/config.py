@@ -16,33 +16,28 @@ class Config(object):
         self.vocab_map = load_vocab(self.vocab_path)
         self.nwords = len(self.vocab_map)
 
-    unk = '[UNK]'
-    pad = '[PAD]'
-    #vocab_path = '/Users/Zealot/yizhou/yizhou/git/dssm/data/vocab.txt'
     vocab_path = '../../data/vocab.txt'
-    # vocab_path = './data/vocab_filtered.txt'
+    # file_train = '../../data/dataset_20190508_20190514_2w.txt'
     file_train = '../../data/dataset_20190508_20190514_2w.txt'
-    # file_train = './data/comment/dataset_20190515_20190512_pv_50.txt'
-    # file_train = './data/oppo_round1_train_20180929.txt'
-    #file_train = './data/oppo_round1_train_20180929_2.txt'
     file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
-    # file_vali = './data/comment/dataset_20191016_vali.txt'
-    # file_vali = './data/oppo_round1_vali_20180929.txt'
-    max_seq_len = 10
-    hidden_size_rnn = 100
-    use_stack_rnn = False
+    # query batch size
+    query_BS = 512
+    L1_N = 1000
+    L2_N = 300
+
     learning_rate = 0.1
-    # max_steps = 8000
-    num_epoch = 10
+    num_epoch = 45
     summaries_dir = './Summaries/'
     gpu = 0
     # negative sample
     NEG = 4
-    # query batch size
-    query_BS = 512
+
     query_mid_vector_file = r'output/y_mid_vector.txt'
     doc_pos_y_mid_vector_file = r'output/doc_pos_y_mid_vector.txt'
     doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
+    # max_seq_len = 10
+    # hidden_size_rnn = 100
+    # use_stack_rnn = False
 
 
 if __name__ == '__main__':

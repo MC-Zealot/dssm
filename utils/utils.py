@@ -182,7 +182,7 @@ def test1():
     print( "bhv_act["+str(i)+"]",bhv_act[i], "query_train_dat["+str(i)+"]",query_train_dat[i])
 
 
-def save_vectorizer(vectorizer,path='../../data/vectorizer_data'):
+def save_vectorizer(vectorizer,path='output/vectorizer_data'):
     """
     保存字典文件
     :param vectorizer:
@@ -194,7 +194,7 @@ def save_vectorizer(vectorizer,path='../../data/vectorizer_data'):
     modelFileSave.close()
 
 
-def load_vectorizer(path='data/vectorizer_data'):
+def load_vectorizer(path='output/vectorizer_data'):
     """
     加载字典文件
     :param path:
@@ -322,6 +322,7 @@ def get_data_set_comment(FileName):
     query = []
     doc = []
     doc_neg = []
+
     with open(FileName, encoding='utf8') as f:
         for line in f.readlines():
 
