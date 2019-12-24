@@ -5,7 +5,7 @@ TensorFlow=1.6
 无bn版本
 """
 import sys
-sys.path.append("../utils")
+sys.path.append("../../")
 from utils.utils import *
 import random
 import time
