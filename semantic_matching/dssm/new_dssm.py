@@ -13,6 +13,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 start = time.time()
 
 conf = Config()
+print("conf: ",conf.__dict__)
 print("conf: ", conf)
 query_BS = conf.query_BS
 L1_N = conf.L1_N
