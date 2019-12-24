@@ -5,6 +5,7 @@ data/*
 Summaries/
 __pycache__/
 model/
+output/
 
 # 通用
 envi/

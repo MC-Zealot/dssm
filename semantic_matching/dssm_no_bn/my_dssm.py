@@ -4,11 +4,14 @@ python=3.6
 TensorFlow=1.6
 无bn版本
 """
+import sys
+sys.path.append("../utils")
+from utils.utils import *
 import random
 import time
 import numpy as np
 import tensorflow as tf
-import utils
+
 from semantic_matching.dssm_no_bn.config import Config
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -28,16 +31,16 @@ query_BS = conf.query_BS
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act, ad_act_neg = utils.get_data_set_comment(conf.file_train)
+bhv_act, ad_act, ad_act_neg = get_data_set_comment(conf.file_train)
 # bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
 # exit(0)
-bhv_act_test, ad_act_test, ad_act_neg_test  = utils.get_data_set_comment(conf.file_vali)
+bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment(conf.file_vali)
 # bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
 vectorizer.fit(ad_act + bhv_act + ad_act_neg)
-utils.save_vectorizer(vectorizer)
+save_vectorizer(vectorizer)
 
 query_train_dat = vectorizer.transform(bhv_act)
 print (type(query_train_dat))
@@ -52,42 +55,6 @@ train_epoch_steps = int(query_train_dat.shape[0] / query_BS) - 1 # = number of s
 print ("train_epoch_steps:", train_epoch_steps)
 vali_epoch_steps = int(query_vali_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
 print ("vali_epoch_steps:", vali_epoch_steps)
-# data_train = data_input.get_data_by_dssm(conf.file_train)
-# print ("data_train['query'] len: ", data_train['query'].shape[0])
-# data_vali = data_input.get_data_by_dssm(conf.file_vali)
-# print ("data_vali['query'] len: ", data_vali['query'].shape[0])
-# train_epoch_steps = int( data_train['query'].shape[0] / query_BS) - 1
-# vali_epoch_steps = int(data_vali['query'].shape[0] / query_BS) - 1
-# print ("train_epoch_steps: ", train_epoch_steps)
-# print ("vali_epoch_steps: ", vali_epoch_steps)
-
-
-def batch_normalization(x, phase_train, out_size):
-    """
-    Batch normalization on convolutional maps.
-    Ref.: http://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow
-    Args:
-        x:           Tensor, 4D BHWD input maps
-        out_size:       integer, depth of input maps
-        phase_train: boolean tf.Varialbe, true indicates training phase
-        scope:       string, variable scope
-    Return:
-        normed:      batch-normalized maps
-    """
-    with tf.variable_scope('bn'):
-        beta = tf.Variable(tf.constant(0.0, shape=[out_size]), name='beta', trainable=True)
-        gamma = tf.Variable(tf.constant(1.0, shape=[out_size]), name='gamma', trainable=True)
-        batch_mean, batch_var = tf.nn.moments(x, [0], name='moments')
-        ema = tf.train.ExponentialMovingAverage(decay=0.5)
-
-        def mean_var_with_update():
-            ema_apply_op = ema.apply([batch_mean, batch_var])
-            with tf.control_dependencies([ema_apply_op]):
-                return tf.identity(batch_mean), tf.identity(batch_var)
-
-        mean, var = tf.cond(phase_train, mean_var_with_update, lambda: (ema.average(batch_mean), ema.average(batch_var)))
-        normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
-    return normed
 
 
 def variable_summaries(var, name):
@@ -130,10 +97,6 @@ with tf.name_scope('FC1'):
 
 
 with tf.name_scope('BN1'):
-    # query_l1 = batch_normalization(query_l1, on_train, L1_N)
-    # doc_l1 = batch_normalization(tf.concat([doc_positive_l1, doc_negative_l1], axis=0), on_train, L1_N)
-    # doc_positive_l1 = tf.slice(doc_l1, [0, 0], [query_BS, -1])
-    # doc_negative_l1 = tf.slice(doc_l1, [query_BS, 0], [-1, -1])
 
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
@@ -154,11 +117,6 @@ with tf.name_scope('FC2'):
 
 
 with tf.name_scope('BN2'):
-    # query_l2 = batch_normalization(query_l2, on_train, L2_N)
-    # doc_l2 = batch_normalization(tf.concat([doc_positive_l2, doc_negative_l2], axis=0), on_train, L2_N)
-    # doc_positive_l2 = tf.slice(doc_l2, [0, 0], [query_BS, -1])
-    # doc_negative_l2 = tf.slice(doc_l2, [query_BS, 0], [-1, -1])
-
     query_y = tf.nn.relu(query_l2,name='embedding_query_y')
     doc_positive_y = tf.nn.relu(doc_positive_l2,name='embedding_doc_positive_y')
     doc_negative_y = tf.nn.relu(doc_negative_l2,name='embedding_doc_negative_y')
@@ -258,17 +216,17 @@ with tf.Session(config=config) as sess:
 
     start = time.time()
     for epoch in range(conf.num_epoch):
-        utils.view_bar("processing image of ", epoch + 1, conf.num_epoch)
+        view_bar("processing image of ", epoch + 1, conf.num_epoch)
         batch_ids = [i for i in range(train_epoch_steps)]
         # print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
            # print("train batch_id:", batch_id)
             # sess.run(train_step, feed_dict=feed_dict(True,True, batch_id))#模型训练
-            cos_s_r=sess.run(cos_sim_raw,feed_dict=utils.pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
+            cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
             # print("cos_sim_raw shape",cos_sim_raw.shape,"cos_sim_raw[0:12]: ",cos_s_r[0:10])
             # exit(0)
-            sess.run(train_step, feed_dict=utils.pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
+            sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
@@ -276,11 +234,11 @@ with tf.Session(config=config) as sess:
         for i in range(train_epoch_steps):
 
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
-            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_loss += loss_v
 
-            sess.run(auc_op, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            auc_v=sess.run(auc_value, feed_dict=utils.pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
@@ -300,15 +258,19 @@ with tf.Session(config=config) as sess:
         for index in range(vali_epoch_steps):
             # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
+                                                         query_BS, query_batch, doc_positive_batch, doc_negative_batch,
+                                                         on_train))
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
-            sess.run(auc_op, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS,
-                                                query_batch, doc_positive_batch, doc_negative_batch, on_train))
-            auc_v = sess.run(auc_value, feed_dict=utils.pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
-                                                        query_BS, query_batch, doc_positive_batch, doc_negative_batch,
-                                                        on_train))
+            sess.run(auc_op,
+                     feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS,
+                                          query_batch, doc_positive_batch, doc_negative_batch, on_train))
+            auc_v = sess.run(auc_value,
+                             feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
+                                                  query_BS, query_batch, doc_positive_batch, doc_negative_batch,
+                                                  on_train))
             epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
