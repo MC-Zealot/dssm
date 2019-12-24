@@ -4,15 +4,12 @@ python=3.5
 TensorFlow=1.2.1
 """
 
-import pandas as pd
-from scipy import sparse
-import collections
 import random
 import time
 import numpy as np
 import tensorflow as tf
-import data_input
-from config import Config
+from utils import data_input
+from semantic_matching.dssm.config import Config
 
 start = time.time()
 # 是否加BN层

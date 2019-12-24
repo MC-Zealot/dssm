@@ -2,19 +2,17 @@
 """
 python=3.6
 TensorFlow=1.6
+无bn版本
 """
-import sys
-from scipy import sparse
 import random
 import time
 import numpy as np
 import tensorflow as tf
 import utils
-from config import Config
+from semantic_matching.dssm.config import Config
 from sklearn.feature_extraction.text import CountVectorizer
 
 start = time.time()
-
 
 # query batch size
 
