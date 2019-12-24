@@ -4,14 +4,11 @@ python=3.5
 TensorFlow=1.2.1
 """
 
-import pandas as pd
-from scipy import sparse
-import collections
 import random
 import time
 import numpy as np
 import tensorflow as tf
-import data_input
+from utils import data_input
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -139,6 +136,7 @@ with tf.name_scope('FC2'):
     query_l2 = add_layer(query_batch, L1_N, L2_N, activation_function=None)
     doc_positive_l2 = add_layer(doc_positive_batch, L1_N, L2_N, activation_function=None)
     doc_negative_l2 = add_layer(doc_negative_batch, L1_N, L2_N, activation_function=None)
+
 
 with tf.name_scope('BN2'):
     query_l2 = batch_normalization(query_l2, on_train, L2_N)

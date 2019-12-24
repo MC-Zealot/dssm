@@ -4,14 +4,11 @@ python=3.5
 TensorFlow=1.2.1
 """
 
-import pandas as pd
-from scipy import sparse
-import collections
 import random
 import time
 import numpy as np
 import tensorflow as tf
-import data_input
+from utils import data_input
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -42,6 +39,18 @@ L2_N = 120
 train_size, test_size = 1000000, 100000
 data_path = 'D:\data\dssm/hy_test.csv'
 data_sets = data_input.get_search_data(data_path, train_size, test_size)
+
+
+def add_layer(inputs, in_size, out_size, activation_function=None):
+    wlimit = np.sqrt(6.0 / (in_size + out_size))
+    Weights = tf.Variable(tf.random_uniform([in_size, out_size], -wlimit, wlimit))
+    biases = tf.Variable(tf.random_uniform([out_size], -wlimit, wlimit))
+    Wx_plus_b = tf.matmul(inputs, Weights) + biases
+    if activation_function is None:
+        outputs = Wx_plus_b
+    else:
+        outputs = activation_function(Wx_plus_b)
+    return outputs
 
 
 def mean_var_with_update(ema, fc_mean, fc_var):
@@ -102,15 +111,10 @@ with tf.name_scope('input'):
     on_train = tf.placeholder(tf.bool)
 
 with tf.name_scope('FC1'):
-    l1_par_range = np.sqrt(6.0 / (TRIGRAM_D + L1_N))
-    weight1 = tf.Variable(tf.random_uniform([TRIGRAM_D, L1_N], -l1_par_range, l1_par_range))
-    bias1 = tf.Variable(tf.random_uniform([L1_N], -l1_par_range, l1_par_range))
-    variable_summaries(weight1, 'L1_weights')
-    variable_summaries(bias1, 'L1_biases')
-
-    query_l1 = tf.sparse_tensor_dense_matmul(query_batch, weight1) + bias1
-    doc_positive_l1 = tf.sparse_tensor_dense_matmul(doc_positive_batch, weight1) + bias1
-    doc_negative_l1 = tf.sparse_tensor_dense_matmul(doc_negative_batch, weight1) + bias1
+    # 激活函数在BN之后，所以此处为None
+    query_l1 = add_layer(query_batch, TRIGRAM_D, L1_N, activation_function=None)
+    doc_positive_l1 = add_layer(doc_positive_batch, TRIGRAM_D, L1_N, activation_function=None)
+    doc_negative_l1 = add_layer(doc_negative_batch, TRIGRAM_D, L1_N, activation_function=None)
 
 with tf.name_scope('BN1'):
     query_l1 = batch_normalization(query_l1, on_train, L1_N)
@@ -121,8 +125,6 @@ with tf.name_scope('BN1'):
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
 
-    # query_l1_out = tf.contrib.slim.batch_norm(query_l1, activation_fn=tf.nn.relu)
-
 # with tf.name_scope('Drop_out'):
 #     keep_prob = tf.placeholder("float")
 #     query_l1_out = tf.nn.dropout(query_l1_out, keep_prob)
@@ -131,20 +133,12 @@ with tf.name_scope('BN1'):
 
 
 with tf.name_scope('FC2'):
-    l2_par_range = np.sqrt(6.0 / (L1_N + L2_N))
-
-    weight2 = tf.Variable(tf.random_uniform([L1_N, L2_N], -l2_par_range, l2_par_range))
-    bias2 = tf.Variable(tf.random_uniform([L2_N], -l2_par_range, l2_par_range))
-    variable_summaries(weight2, 'L2_weights')
-    variable_summaries(bias2, 'L2_biases')
-
-    query_l2 = tf.matmul(query_l1_out, weight2) + bias2
-    doc_positive_l2 = tf.matmul(doc_positive_l1_out, weight2) + bias2
-    doc_negative_l2 = tf.matmul(doc_negative_l1_out, weight2) + bias2
-
-    query_l2 = batch_normalization(query_l2, on_train, L2_N)
+    query_l2 = add_layer(query_batch, L1_N, L2_N, activation_function=None)
+    doc_positive_l2 = add_layer(doc_positive_batch, L1_N, L2_N, activation_function=None)
+    doc_negative_l2 = add_layer(doc_negative_batch, L1_N, L2_N, activation_function=None)
 
 with tf.name_scope('BN2'):
+    query_l2 = batch_normalization(query_l2, on_train, L2_N)
     doc_l2 = batch_normalization(tf.concat([doc_positive_l2, doc_negative_l2], axis=0), on_train, L2_N)
     doc_positive_l2 = tf.slice(doc_l2, [0, 0], [query_BS, -1])
     doc_negative_l2 = tf.slice(doc_l2, [query_BS, 0], [-1, -1])
@@ -157,7 +151,6 @@ with tf.name_scope('BN2'):
 with tf.name_scope('Merge_Negative_Doc'):
     # 合并负样本，tile可选择是否扩展负样本。
     doc_y = tf.tile(doc_positive_y, [1, 1])
-
     for i in range(NEG):
         for j in range(query_BS):
             # slice(input_, begin, size)切片API
@@ -170,11 +163,11 @@ with tf.name_scope('Cosine_Similarity'):
     # doc_norm = sqrt(sum(each x^2))
     doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True))
 
-    prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [NEG + 1, 1]), doc_y), 1, True)#分子
-    norm_prod = tf.multiply(query_norm, doc_norm)#分母
+    prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [NEG + 1, 1]), doc_y), 1, True)
+    norm_prod = tf.multiply(query_norm, doc_norm)
 
     # cos_sim_raw = query * doc / (||query|| * ||doc||)
-    cos_sim_raw = tf.truediv(prod, norm_prod)#除法
+    cos_sim_raw = tf.truediv(prod, norm_prod)
     # gamma = 20
     cos_sim = tf.transpose(tf.reshape(tf.transpose(cos_sim_raw), [NEG + 1, query_BS])) * 20
 
