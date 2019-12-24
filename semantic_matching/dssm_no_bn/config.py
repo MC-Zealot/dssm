@@ -20,7 +20,7 @@ class Config(object):
         self.file_vali = '../../data/comment/testset_repeat_20190515_20190515_shuffle.txt'
         self.L1_N = 1000
         self.L2_N = 300
-        self.query_BS = 512
+        self.query_BS = 256
         self.learning_rate = 0.00001
         self.num_epoch = 40
         self.summaries_dir = './Summaries/'
