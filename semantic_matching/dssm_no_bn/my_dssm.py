@@ -187,7 +187,7 @@ with tf.name_scope('Auc'):
     label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
     predictions = tf.gather(cos_sim_raw, indices)
     # end of insert
-    auc_value, auc_op = tf.metrics.auc(label_tensor, cos_sim_raw, num_thresholds=2000)
+    auc_value, auc_op = tf.metrics.auc(label_tensor, predictions, num_thresholds=2000)
     tf.summary.scalar('auc', auc_value)
 
 merged = tf.summary.merge_all()
@@ -222,7 +222,7 @@ with tf.Session(config=config) as sess:
         for batch_id in batch_ids:
            # print("train batch_id:", batch_id)
             # sess.run(train_step, feed_dict=feed_dict(True,True, batch_id))#模型训练
-            cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
+            # cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
             # print("cos_sim_raw shape",cos_sim_raw.shape,"cos_sim_raw[0:12]: ",cos_s_r[0:10])
             # exit(0)
             sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
