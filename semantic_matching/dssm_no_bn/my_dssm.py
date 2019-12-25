@@ -181,14 +181,14 @@ with tf.name_scope('Accuracy'):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.scalar('accuracy', accuracy)
 
-with tf.name_scope('Auc'):
-    # insert by trobr
-    indices = tf.squeeze(tf.where(tf.less_equal(label_tensor, 2 - 1)), 1)
-    label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
-    predictions = tf.gather(cos_sim_raw, indices)
-    # end of insert
-    auc_value, auc_op = tf.metrics.auc(label_tensor, predictions, num_thresholds=2000)
-    tf.summary.scalar('auc', auc_value)
+# with tf.name_scope('Auc'):
+#     # insert by trobr
+#     indices = tf.squeeze(tf.where(tf.less_equal(label_tensor, 2 - 1)), 1)
+#     label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
+#     predictions = tf.gather(cos_sim_raw, indices)
+#     # end of insert
+#     auc_value, auc_op = tf.metrics.auc(label_tensor, predictions, num_thresholds=2000)
+#     tf.summary.scalar('auc', auc_value)
 
 merged = tf.summary.merge_all()
 
@@ -236,7 +236,7 @@ with tf.Session(config=config) as sess:
             loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             epoch_loss += loss_v
 
-            sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             # auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             # epoch_auc += auc_v
 
@@ -263,9 +263,7 @@ with tf.Session(config=config) as sess:
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
-            sess.run(auc_op,
-                     feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS,
-                                          query_batch, doc_positive_batch, doc_negative_batch, on_train))
+            # sess.run(auc_op,feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch, on_train))
             # auc_v = sess.run(auc_value, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch, on_train))
             # epoch_auc += auc_v
 
