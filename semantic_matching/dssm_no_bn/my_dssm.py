@@ -237,8 +237,8 @@ with tf.Session(config=config) as sess:
             epoch_loss += loss_v
 
             sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            epoch_auc += auc_v
+            # auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            # epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
         #    print("epoch: ", epoch,", train_epoch_steps: ", i,", train_loss: ", loss_v,", auc: ", auc_v)
@@ -266,11 +266,8 @@ with tf.Session(config=config) as sess:
             sess.run(auc_op,
                      feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS,
                                           query_batch, doc_positive_batch, doc_negative_batch, on_train))
-            auc_v = sess.run(auc_value,
-                             feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
-                                                  query_BS, query_batch, doc_positive_batch, doc_negative_batch,
-                                                  on_train))
-            epoch_auc += auc_v
+            # auc_v = sess.run(auc_value, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index, query_BS, query_batch, doc_positive_batch, doc_negative_batch, on_train))
+            # epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
 #            print("epoch: ", epoch, ", test_epoch_steps: ", index, ", test_loss: ", loss_v, ", auc: ", auc_v)
