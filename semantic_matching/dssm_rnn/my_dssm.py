@@ -27,10 +27,10 @@ L2_N = conf.L2_N
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act, ad_act_neg = get_data_set_comment(conf.file_train)
+bhv_act, ad_act, ad_act_neg = get_data_set_comment(conf.file_train, conf)
 # bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
 # exit(0)
-bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment(conf.file_vali)
+bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment(conf.file_vali, conf)
 # bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
@@ -72,11 +72,12 @@ with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
     print ("TRIGRAM_D: ",TRIGRAM_D)
     #定义数据结构，类型、shape
-    query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
-    doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
-    doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
+    query_batch = tf.placeholder(tf.int32, shape=[None, TRIGRAM_D], name='query_batch')
+    doc_positive_batch = tf.placeholder(tf.int32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
+    doc_negative_batch = tf.placeholder(tf.int32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool, name='on_train')
 K = 500
+
 with tf.name_scope('word_embeddings_layer'):
     _word_embedding = tf.get_variable(name="word_embedding_arr", dtype=tf.float32, shape=[TRIGRAM_D, K])
     query_embed = tf.nn.embedding_lookup(_word_embedding, query_batch, name='query_batch_embed')
@@ -91,12 +92,9 @@ with tf.name_scope('FC1'):
     variable_summaries(weight1, 'L1_weights')
     variable_summaries(bias1, 'L1_biases')
 
-    query_l1 = tf.sparse_tensor_dense_matmul(query_embed, weight1) + bias1
-    doc_positive_l1 = tf.sparse_tensor_dense_matmul(doc_pos_embed, weight1) + bias1
-    doc_negative_l1 = tf.sparse_tensor_dense_matmul(doc_neg_embed, weight1) + bias1
-
-
-with tf.name_scope('BN1'):
+    query_l1 = tf.matmul(query_embed, weight1) + bias1
+    doc_positive_l1 = tf.matmul(doc_pos_embed, weight1) + bias1
+    doc_negative_l1 = tf.matmul(doc_neg_embed, weight1) + bias1
 
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
@@ -115,8 +113,6 @@ with tf.name_scope('FC2'):
     doc_positive_l2 = tf.matmul(doc_positive_l1_out, weight2) + bias2
     doc_negative_l2 = tf.matmul(doc_negative_l1_out, weight2) + bias2
 
-
-with tf.name_scope('BN2'):
     query_y = tf.nn.relu(query_l2,name='embedding_query_y')
     doc_positive_y = tf.nn.relu(doc_positive_l2,name='embedding_doc_positive_y')
     doc_negative_y = tf.nn.relu(doc_negative_l2,name='embedding_doc_negative_y')
@@ -226,7 +222,7 @@ with tf.Session(config=config) as sess:
             # cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
             # print("cos_sim_raw shape",cos_sim_raw.shape,"cos_sim_raw[0:12]: ",cos_s_r[0:10])
             # exit(0)
-            sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
+            sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train, conf))
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
@@ -234,7 +230,7 @@ with tf.Session(config=config) as sess:
         for i in range(train_epoch_steps):
 
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
-            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train, conf))
             epoch_loss += loss_v
 
             # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
@@ -260,7 +256,7 @@ with tf.Session(config=config) as sess:
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
             loss_v = sess.run(loss, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
                                                          query_BS, query_batch, doc_positive_batch, doc_negative_batch,
-                                                         on_train))
+                                                         on_train, conf))
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 

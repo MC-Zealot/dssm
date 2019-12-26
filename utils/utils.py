@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding=utf-8
-from semantic_matching.dssm.config import Config
+# from semantic_matching.dssm.config import Config
 import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
@@ -12,7 +12,7 @@ import sys
 import re
 
 # 配置文件
-conf = Config()
+# conf = Config()
 
 
 def convert_sparse_matrix_to_sparse_tensor(X):
@@ -22,7 +22,7 @@ def convert_sparse_matrix_to_sparse_tensor(X):
 
 
 def pull_batch(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,
-               doc_neg_batch, on_train_batch):
+               doc_neg_batch, on_train_batch,conf):
     # print("batch_idx: ",batch_idx, "doc_data shape",np.shape(doc_data))
     # print("batch_idx: ",batch_idx, "doc_neg_data shape",np.shape(doc_neg_data))
     query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
@@ -39,7 +39,7 @@ def pull_batch(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, q
     return {query_batch: query_in, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in, on_train_batch: on_training}
 
 
-def GetActDat_v2(FileName):
+def GetActDat_v2(FileName,conf):
     """
 
     :param FileName:
@@ -80,7 +80,8 @@ def GetActDat_v2(FileName):
 
     return query, doc, doc_neg
 
-def GetActDat(FileName):
+
+def GetActDat(FileName,conf):
     """
 
     :param FileName:
@@ -121,7 +122,7 @@ def GetActDat(FileName):
     return query, doc, doc_neg
 
 
-def get_data_set(FileName):
+def get_data_set(FileName, conf):
     """
 1、查看query结构，字符串，句子每个字以空格为分隔符，uni gram
 2、查看doc正例与负例结构
@@ -163,7 +164,7 @@ def test1():
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
     file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
-    bhv_act, ad_act, ad_act_neg = GetActDat_v2(file_train)
+    bhv_act, ad_act, ad_act_neg = GetActDat_v2(file_train, conf)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
     # bhv_act = set(bhv_act)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
@@ -254,7 +255,7 @@ def str_to_dict(str):
     return dict
 
 
-def test_case_for_cal_similarity():
+def test_case_for_cal_similarity(conf):
     # 1、打开query文件，加载数据到list[dict]中，
     #     # 2、打开doc_neg文件，加载数据到list[dict]中，
     #     # 3、根据index选择query-docs
@@ -309,7 +310,7 @@ def view_bar(message, num, total):
     print()
 
 
-def get_data_set_comment(FileName):
+def get_data_set_comment(FileName, conf):
     """
     评论流数据
 1、查看query（正文博文）结构，字符串，句子每个字以空格为分隔符，uni gram
@@ -381,13 +382,13 @@ def pre_process(line):
     return line
 
 
-def get_data(file_path):
+def get_data(file_path,conf):
     """
     gen datasets, convert word into word ids.
     :param file_path:
     :return: [[query, pos sample, 4 neg sample]], shape = [n, 6]
     """
-    conf = Config()
+    # conf = Config()
     data_map = {'query': [], 'query_len': [], 'doc_pos': [],  'doc_pos_len': [], 'doc_neg': [], 'doc_neg_len': []}
     with open(file_path, encoding='utf8') as f:
         for line in f.readlines():
@@ -403,13 +404,13 @@ def get_data(file_path):
             for each in query_pred: #从预测的query中，找4个负例
                 if each == title:
                     continue
-                cur_arr.append(convert_word2id(each, conf.vocab_map))
+                cur_arr.append(convert_word2id(each, conf.vocab_map, conf))
                 each_len = len(each) if len(each) < conf.max_seq_len else conf.max_seq_len
                 cur_len.append(each_len)
             if len(cur_arr) >= 4:
-                data_map['query'].append(convert_word2id(prefix, conf.vocab_map))
+                data_map['query'].append(convert_word2id(prefix, conf.vocab_map, conf))
                 data_map['query_len'].append(len(prefix) if len(prefix) < conf.max_seq_len else conf.max_seq_len)
-                data_map['doc_pos'].append(convert_word2id(title, conf.vocab_map))  #点击的query当做正例
+                data_map['doc_pos'].append(convert_word2id(title, conf.vocab_map, conf))  #点击的query当做正例
                 data_map['doc_pos_len'].append(len(title) if len(title) < conf.max_seq_len else conf.max_seq_len)
                 data_map['doc_neg'].extend(cur_arr[:4])  #只取前4个负例
                 data_map['doc_neg_len'].extend(cur_len[:4])
@@ -417,7 +418,7 @@ def get_data(file_path):
             pass
     return data_map
 
-def convert_word2id(query, vocab_map):
+def convert_word2id(query, vocab_map, conf):
     """
     从生成好的字典里找到字的id
     :param query:
@@ -451,7 +452,9 @@ if __name__ == '__main__':
     # print(pre_process(str))
     # test_case_for_cal_similarity()
     file_train = './data/comment/trainset_20190515_20190521_mini.txt'
-    query, doc, doc_neg = get_data_set_comment(file_train)
+    from semantic_matching.dssm.config import Config
+    conf = Config()
+    query, doc, doc_neg = get_data_set_comment(file_train, conf)
     idx = 0
     print("query: ",query[idx])
     print("doc: ",doc[idx])
