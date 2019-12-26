@@ -111,8 +111,7 @@ with tf.name_scope('input'):
     drop_out_prob = tf.placeholder(tf.float32, name='drop_out_prob')
 
 with tf.name_scope('word_embeddings_layer'):
-    _word_embedding = tf.get_variable(name="word_embedding_arr", dtype=tf.float32,
-                                      shape=[conf.nwords, TRIGRAM_D])
+    _word_embedding = tf.get_variable(name="word_embedding_arr", dtype=tf.float32, shape=[conf.nwords, TRIGRAM_D])
     query_embed = tf.nn.embedding_lookup(_word_embedding, query_batch, name='query_batch_embed')
     doc_pos_embed = tf.nn.embedding_lookup(_word_embedding, doc_pos_batch, name='doc_positive_embed')
     doc_neg_embed = tf.nn.embedding_lookup(_word_embedding, doc_neg_batch, name='doc_negative_embed')
