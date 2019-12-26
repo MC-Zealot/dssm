@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding=utf-8
-from semantic_matching.dssm_rnn.config import Config
+from semantic_matching.dssm.config import Config
 import numpy as np
 import tensorflow as tf
 from sklearn.feature_extraction.text import CountVectorizer
@@ -434,6 +434,8 @@ def convert_word2id(query, vocab_map):
         ids.append(vocab_map[conf.pad])
     ids = np.array(ids)
     return ids[:conf.max_seq_len]
+
+
 if __name__ == '__main__':
     print("hello")
     # vectorizer=load_vectorizer()

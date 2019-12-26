@@ -29,9 +29,7 @@ class Config(object):
         self.query_mid_vector_file = r'output/y_mid_vector.txt'
         self.doc_pos_y_mid_vector_file = r'output/doc_pos_y_mid_vector.txt'
         self.doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
-        self.max_seq_len = 10
-        self.hidden_size_rnn = 100
-        self.use_stack_rnn = False
+
         self.to_string()
 
 

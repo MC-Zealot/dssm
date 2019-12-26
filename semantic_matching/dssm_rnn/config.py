@@ -12,6 +12,13 @@ def load_vocab(file_path):
 
 
 class Config(object):
+    def to_string(self):
+        print("conf params: ")
+        hyper_params = self.__dict__
+        for key in hyper_params:
+            print(str(key) + ": " + str(hyper_params[key]))
+
+
     def __init__(self):
 
         self.vocab_path = '../../data/vocab.txt'
@@ -44,6 +51,7 @@ class Config(object):
         self.max_seq_len = 10
         self.hidden_size_rnn = 100
         self.use_stack_rnn = False
+        self.to_string()
 
 
 if __name__ == '__main__':
