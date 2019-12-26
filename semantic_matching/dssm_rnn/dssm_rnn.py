@@ -8,8 +8,8 @@ import random
 import time
 import numpy as np
 import tensorflow as tf
-from utils import data_input
-from semantic_matching.dssm.config import Config
+from utils import utils
+from semantic_matching.dssm_rnn.config import Config
 
 start = time.time()
 # 是否加BN层
@@ -28,9 +28,9 @@ L2_N = 120
 
 # 读取数据
 conf = Config()
-data_train = data_input.get_data(conf.file_train)
+data_train = utils.get_data(conf.file_train)
 print (type(data_train['query']))
-data_vali = data_input.get_data(conf.file_vali)
+data_vali = utils.get_data(conf.file_vali)
 # print(len(data_train['query']), query_BS, len(data_train['query']) / query_BS)
 train_epoch_steps = int(len(data_train['query']) / query_BS) - 1
 vali_epoch_steps = int(len(data_vali['query']) / query_BS) - 1
