@@ -19,9 +19,6 @@ start = time.time()
 
 # 读取数据
 conf = Config()
-hyper_params = conf.__dict__
-for key in hyper_params:
-    print(str(key) + ": " + str(hyper_params[key]))
 query_BS = conf.query_BS
 
 L1_N = conf.L1_N
