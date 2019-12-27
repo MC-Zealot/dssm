@@ -451,15 +451,24 @@ if __name__ == '__main__':
     # str=str.replace(url[0],"")
     # print(pre_process(str))
     # test_case_for_cal_similarity()
-    file_train = './data/comment/trainset_20190515_20190521_mini.txt'
-    from semantic_matching.dssm.config import Config
-    conf = Config()
-    query, doc, doc_neg = get_data_set_comment(file_train, conf)
-    idx = 0
-    print("query: ",query[idx])
-    print("doc: ",doc[idx])
-    print("doc_neg: ",doc_neg[idx][0])
-    print("doc_neg: ",doc_neg[idx][1])
-    print("doc_neg: ",doc_neg[idx][2])
-    print("doc_neg: ",doc_neg[idx][3])
+    # file_train = './data/comment/trainset_20190515_20190521_mini.txt'
+    # from semantic_matching.dssm.config import Config
+    # conf = Config()
+    # query, doc, doc_neg = get_data_set_comment(file_train, conf)
+    # idx = 0
+    # print("query: ",query[idx])
+    # print("doc: ",doc[idx])
+    # print("doc_neg: ",doc_neg[idx][0])
+    # print("doc_neg: ",doc_neg[idx][1])
+    # print("doc_neg: ",doc_neg[idx][2])
+    # print("doc_neg: ",doc_neg[idx][3])
+    sess = tf.InteractiveSession()
+
+    embedding = tf.Variable(np.identity(6, dtype=np.int32))
+    input_ids = tf.placeholder(dtype=tf.int32, shape=[None])
+    input_embedding = tf.nn.embedding_lookup(embedding, input_ids)
+
+    sess.run(tf.global_variables_initializer())
+    print(sess.run(embedding))
+    print(sess.run(input_embedding, feed_dict={input_ids: [4, 0, 2, 4, 5, 1, 3, 0]}))
 

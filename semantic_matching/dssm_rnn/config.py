@@ -28,10 +28,10 @@ class Config(object):
         self.unk = '[UNK]'
         self.pad = '[PAD]'
         # self.file_train = '../../data/comment/trainset_repeat_20190508_20190514_shuffle.txt'
-        #self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
-        self.file_train = '../../data/oppo_round1_train_20180929_mini.txt'
-        #self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
-        self.file_vali = '../../data/oppo_round1_vali_20180929_mini.txt'
+        self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
+        # self.file_train = '../../data/oppo_round1_train_20180929_mini.txt'
+        self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
+        # self.file_vali = '../../data/oppo_round1_vali_20180929_mini.txt'
         # self.file_vali = '../../data/comment/testset_repeat_20190515_20190515_shuffle.txt'
         # query batch size
         self.query_BS = 256
