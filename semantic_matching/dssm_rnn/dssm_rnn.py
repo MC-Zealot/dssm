@@ -274,8 +274,7 @@ def pull_batch(data_map, batch_id):
 
 
 def feed_dict(on_training, batch_id, drop_prob):
-    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_train,
-                                                                                                     batch_id)
+    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_train, batch_id)
     query_len = len(query_in)
     query_seq_len = [conf.max_seq_len] * query_len
     pos_seq_len = [conf.max_seq_len] * query_len
@@ -285,8 +284,7 @@ def feed_dict(on_training, batch_id, drop_prob):
             neg_seq_length: neg_seq_len, pos_seq_length: pos_seq_len}
 
 def feed_dict_vali(on_training, batch_id, drop_prob):
-    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali,
-                                                                                                     batch_id)
+    query_in, doc_positive_in, doc_negative_in, query_seq_len, pos_seq_len, neg_seq_len = pull_batch(data_vali, batch_id)
     query_len = len(query_in)
     query_seq_len = [conf.max_seq_len] * query_len
     pos_seq_len = [conf.max_seq_len] * query_len

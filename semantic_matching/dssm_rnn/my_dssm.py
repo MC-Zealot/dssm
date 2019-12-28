@@ -92,75 +92,28 @@ with tf.name_scope('word_embeddings_layer'):
     _word_embedding = tf.get_variable(name="word_embedding_arr", dtype=tf.float32, shape=[TRIGRAM_D, K])
     query_embed = tf.nn.embedding_lookup(_word_embedding, query_batch, name='query_batch_embed')
     doc_pos_embed = tf.nn.embedding_lookup(_word_embedding, doc_pos_batch, name='doc_positive_embed')
-    doc_neg_embed = tf.nn.embedding_lookup(_word_embedding, doc_pos_batch, name='doc_negative_embed')
+    doc_neg_embed = tf.nn.embedding_lookup(_word_embedding, doc_neg_batch, name='doc_negative_embed')
 
 
-# with tf.name_scope('FC1'):
-#     l1_par_range = np.sqrt(6.0 / (K + L1_N))
-#     weight1 = tf.Variable(tf.random_uniform([K, L1_N], -l1_par_range, l1_par_range))
-#     bias1 = tf.Variable(tf.random_uniform([L1_N], -l1_par_range, l1_par_range))
-#     variable_summaries(weight1, 'L1_weights')
-#     variable_summaries(bias1, 'L1_biases')
-#
-#     query_l1 = tf.matmul(query_embed, weight1) + bias1
-#     doc_positive_l1 = tf.matmul(doc_pos_embed, weight1) + bias1
-#     doc_negative_l1 = tf.matmul(doc_neg_embed, weight1) + bias1
-#
-#     query_l1_out = tf.nn.relu(query_l1)
-#     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
-#     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
-#
-#
-# with tf.name_scope('FC2'):
-#     l2_par_range = np.sqrt(6.0 / (L1_N + L2_N))
-#
-#     weight2 = tf.Variable(tf.random_uniform([L1_N, L2_N], -l2_par_range, l2_par_range))
-#     bias2 = tf.Variable(tf.random_uniform([L2_N], -l2_par_range, l2_par_range))
-#     variable_summaries(weight2, 'L2_weights')
-#     variable_summaries(bias2, 'L2_biases')
-#
-#     query_l2 = tf.matmul(query_l1_out, weight2) + bias2
-#     doc_positive_l2 = tf.matmul(doc_positive_l1_out, weight2) + bias2
-#     doc_negative_l2 = tf.matmul(doc_negative_l1_out, weight2) + bias2
-#
-#     query_y = tf.nn.relu(query_l2,name='embedding_query_y')
-#     doc_positive_y = tf.nn.relu(doc_positive_l2,name='embedding_doc_positive_y')
-#     doc_negative_y = tf.nn.relu(doc_negative_l2,name='embedding_doc_negative_y')
 with tf.name_scope('RNN'):
     # Abandon bag of words, use GRU, you can use stacked gru
     # query_l1 = add_layer(query_batch, TRIGRAM_D, L1_N, activation_function=None)  # tf.nn.relu()
     # doc_positive_l1 = add_layer(doc_positive_batch, TRIGRAM_D, L1_N, activation_function=None)
     # doc_negative_l1 = add_layer(doc_negative_batch, TRIGRAM_D, L1_N, activation_function=None)
-    if conf.use_stack_rnn:
-        cell_fw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
-        stacked_gru_fw = tf.contrib.rnn.MultiRNNCell([cell_fw], state_is_tuple=True)
-        cell_bw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
-        stacked_gru_bw = tf.contrib.rnn.MultiRNNCell([cell_fw], state_is_tuple=True)
-        (output_fw, output_bw), (_, _) = tf.nn.bidirectional_dynamic_rnn(stacked_gru_fw, stacked_gru_bw)
-        # not ready, to be continue ...
-    else:
-        cell_fw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
-        cell_bw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
-        # query
-        (_, _), (query_output_fw, query_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, query_embed,
-                                                                                     sequence_length=query_seq_length,
-                                                                                     dtype=tf.float32)
-        query_rnn_output = tf.concat([query_output_fw, query_output_bw], axis=-1)
-        # query_rnn_output = tf.nn.dropout(query_rnn_output, drop_out_prob)
-        # doc_pos
-        (_, _), (doc_pos_output_fw, doc_pos_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw,
-                                                                                         doc_pos_embed,
-                                                                                         sequence_length=pos_seq_length,
-                                                                                         dtype=tf.float32)
-        doc_pos_rnn_output = tf.concat([doc_pos_output_fw, doc_pos_output_bw], axis=-1)
-        # doc_pos_rnn_output = tf.nn.dropout(doc_pos_rnn_output, drop_out_prob)
-        # doc_neg
-        (_, _), (doc_neg_output_fw, doc_neg_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw,
-                                                                                         doc_neg_embed,
-                                                                                         sequence_length=neg_seq_length,
-                                                                                         dtype=tf.float32)
-        doc_neg_rnn_output = tf.concat([doc_neg_output_fw, doc_neg_output_bw], axis=-1)
-        # doc_neg_rnn_output = tf.nn.dropout(doc_neg_rnn_output, drop_out_prob)
+    cell_fw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
+    cell_bw = tf.contrib.rnn.GRUCell(conf.hidden_size_rnn, reuse=tf.AUTO_REUSE)
+    # query
+    (_, _), (query_output_fw, query_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, query_embed, sequence_length=query_seq_length, dtype=tf.float32)
+    query_rnn_output = tf.concat([query_output_fw, query_output_bw], axis=-1)
+    # query_rnn_output = tf.nn.dropout(query_rnn_output, drop_out_prob)
+    # doc_pos
+    (_, _), (doc_pos_output_fw, doc_pos_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, doc_pos_embed, sequence_length=pos_seq_length, dtype=tf.float32)
+    doc_pos_rnn_output = tf.concat([doc_pos_output_fw, doc_pos_output_bw], axis=-1)
+    # doc_pos_rnn_output = tf.nn.dropout(doc_pos_rnn_output, drop_out_prob)
+    # doc_neg
+    (_, _), (doc_neg_output_fw, doc_neg_output_bw) = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, doc_neg_embed, sequence_length=neg_seq_length, dtype=tf.float32)
+    doc_neg_rnn_output = tf.concat([doc_neg_output_fw, doc_neg_output_bw], axis=-1)
+    # doc_neg_rnn_output = tf.nn.dropout(doc_neg_rnn_output, drop_out_prob)
 
 with tf.name_scope('Merge_Negative_Doc'):
     # 合并负样本，tile可选择是否扩展负样本。
@@ -172,48 +125,10 @@ with tf.name_scope('Merge_Negative_Doc'):
             # slice(input_, begin, size)切片API
             # doc_y = tf.concat([doc_y, tf.slice(doc_negative_y, [j * NEG + i, 0], [1, -1])], 0)
             doc_y = tf.concat([doc_y, tf.slice(doc_neg_rnn_output, [j * conf.NEG + i, 0], [1, -1])], 0)
-            print("doc_y ", i, ": ", doc_y.shape)
+
+        print("doc_y ", i, ": ", doc_y.shape)
 
 
-# with tf.name_scope('Merge_Negative_Doc'):
-#     #获取正样本
-#     doc_y = tf.tile(doc_positive_y, [1, 1])#这句话因为tile（mul）的结构是[1，1]，所以觉得tile没啥必要，直接赋值就行了
-#     label_pos = [1]*query_BS
-#     label_neg=[0]*query_BS*conf.NEG
-#     label=label_pos+label_neg
-#     label_tensor = tf.convert_to_tensor(label)
-#     print("doc_positive_y shape: ",doc_positive_y.shape,", doc_y: ",doc_y.shape)
-#     # 在正样本上合并负样本，tile可选择是否扩展负样本。
-#     for i in range(conf.NEG):
-#         # print ("i: ",i)
-#         for j in range(query_BS):
-#             # slice(input_, begin, size)切片API
-#             doc_y = tf.concat(
-#                 [doc_y, tf.slice(
-#                     doc_negative_y,
-#                     [j * conf.NEG + i, 0],
-#                     [1, -1] #If `size[i]` is -1, all remaining elements in dimension i are included in the slice
-#                 )],
-#                 0)
-#         print("doc_y ", i, ": ", doc_y.shape)
-
-# with tf.name_scope('Cosine_Similarity'):
-#     # Cosine similarity
-#     # query_norm = sqrt(sum(each x^2))
-#     query_norm = tf.tile(tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True)), [conf.NEG + 1, 1], name='query_norm') #包括了query的embedding
-#     query_norm_single = tf.sqrt(tf.reduce_sum(tf.square(query_y), 1, True), name='query_norm_single') #包括了query的embedding
-#     # doc_norm = sqrt(sum(each x^2))
-#     doc_norm = tf.sqrt(tf.reduce_sum(tf.square(doc_y), 1, True), name='doc_norm')  #doc_y  shape: (500,120)，包括了正例的embedding
-#
-#     prod = tf.reduce_sum(tf.multiply(tf.tile(query_y, [conf.NEG + 1, 1]), doc_y), 1, True)
-#     norm_prod = tf.multiply(query_norm, doc_norm)
-#
-#     # cos_sim_raw = query * doc / (||query|| * ||doc||)
-#     cos_sim_raw = tf.truediv(prod, norm_prod)#1、输出一下结构，2、修改结构，变成n*1，当做out
-#     # gamma = 20
-#     cos_sim = tf.transpose(tf.reshape(tf.transpose(cos_sim_raw), [conf.NEG + 1, query_BS])) * 20
-#     print ("cos_sim shape: ", cos_sim.shape)
-#     print ("cos_sim [0]: ", cos_sim[0])
 
 with tf.name_scope('Cosine_Similarity'):
     # Cosine similarity
@@ -291,21 +206,18 @@ with tf.Session(config=config) as sess:
         # print ("batch_ids: ", batch_ids)
         random.shuffle(batch_ids)
         for batch_id in batch_ids:
-           # print("train batch_id:", batch_id)
-            # sess.run(train_step, feed_dict=feed_dict(True,True, batch_id))#模型训练
-            # cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
-            # print("cos_sim_raw shape",cos_sim_raw.shape,"cos_sim_raw[0:12]: ",cos_s_r[0:10])
-            # exit(0)
-            print(sess.run(query_embed,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_pos_batch,doc_neg_batch,on_train, conf)))
-            sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_pos_batch,doc_neg_batch,on_train, conf))
+            sess.run(train_step, feed_dict=pull_batch_rnn(
+                True, query_train_dat, doc_train_dat,doc_neg_train_dat,
+                batch_id, query_BS, query_batch, doc_pos_batch,doc_neg_batch, on_train,
+                query_seq_length, neg_seq_length, pos_seq_length,
+                conf))
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
         epoch_auc = 0
         for i in range(train_epoch_steps):
 
-            # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
-            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_pos_batch, doc_neg_batch,on_train, conf))
+            loss_v = sess.run(loss, feed_dict=pull_batch_rnn(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_pos_batch, doc_neg_batch,on_train, query_seq_length, neg_seq_length, pos_seq_length,conf))
             epoch_loss += loss_v
 
             # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
@@ -328,10 +240,9 @@ with tf.Session(config=config) as sess:
         epoch_auc = 0
         for index in range(vali_epoch_steps):
             # print("test batch_id:", batch_id,", i: ",i)
-            # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
+            loss_v = sess.run(loss, feed_dict=pull_batch_rnn(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
                                                          query_BS, query_batch, doc_pos_batch, doc_neg_batch,
-                                                         on_train, conf))
+                                                         on_train, query_seq_length, neg_seq_length, pos_seq_length,conf))
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 

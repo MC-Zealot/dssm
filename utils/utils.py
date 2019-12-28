@@ -39,6 +39,33 @@ def pull_batch(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, q
     return {query_batch: query_in, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in, on_train_batch: on_training}
 
 
+def pull_batch_rnn(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,
+               doc_neg_batch, on_train_batch, query_seq_length, neg_seq_length,pos_seq_length, conf):
+    query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
+    doc_pos_in = doc_data[batch_idx * BS:(batch_idx + 1) * BS, :]
+    doc_neg_in = doc_neg_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG, :]
+    # pos_seq_len = doc_data[batch_idx * BS:(batch_idx + 1) * BS]
+    # neg_seq_len = doc_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG]
+
+    # print("batch_idx: ",batch_idx, "query_in shape: ", np.shape(query_in))
+    # print("batch_idx: ",batch_idx, "doc_neg_in shape: ", np.shape(doc_neg_in))
+    query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
+    doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
+    doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
+    query_len = len(query_in)
+    query_in = tf.sparse.to_dense(query_in)
+    doc_pos_in = tf.sparse.to_dense(doc_pos_in)
+    doc_neg_in = tf.sparse.to_dense(doc_neg_in)
+
+    query_seq_len = [conf.max_seq_len] * query_len
+    pos_seq_len = [conf.max_seq_len] * query_len
+    neg_seq_len = [conf.max_seq_len] * query_len * conf.NEG
+    return {query_batch: query_in, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in, on_train_batch: on_training,
+            query_seq_length: query_seq_len,
+            neg_seq_length: neg_seq_len,
+            pos_seq_length: pos_seq_len}
+
+
 def GetActDat_v2(FileName,conf):
     """
 
@@ -164,7 +191,7 @@ def test1():
     # prefix, query_prediction, title, tag, label
     # query_prediction 为json格式。
     file_train = './data/oppo_round1_train_20180929_mini.txt.bak'
-    bhv_act, ad_act, ad_act_neg = GetActDat_v2(file_train, conf)
+    bhv_act, ad_act, ad_act_neg = GetActDat_v2(file_train)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
     # bhv_act = set(bhv_act)
     print("len: ", len(bhv_act), ", bhv_act: ", bhv_act)
