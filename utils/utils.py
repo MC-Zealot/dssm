@@ -18,6 +18,7 @@ import re
 def convert_sparse_matrix_to_sparse_tensor(X):
     coo = X.tocoo()
     indices = np.mat([coo.row, coo.col]).transpose()
+
     return tf.SparseTensorValue(indices, coo.data, coo.shape)
 
 
@@ -40,7 +41,7 @@ def pull_batch(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, q
 
 
 def pull_batch_rnn(on_training, query_data, doc_data, doc_neg_data, batch_idx, BS, query_batch, doc_pos_batch,
-               doc_neg_batch, on_train_batch, query_seq_length, neg_seq_length,pos_seq_length, conf):
+               doc_neg_batch, on_train_batch, query_seq_length, neg_seq_length,pos_seq_length, TRIGRAM_D,conf):
     query_in = query_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_pos_in = doc_data[batch_idx * BS:(batch_idx + 1) * BS, :]
     doc_neg_in = doc_neg_data[batch_idx * BS * conf.NEG:(batch_idx + 1) * BS * conf.NEG, :]
@@ -49,18 +50,24 @@ def pull_batch_rnn(on_training, query_data, doc_data, doc_neg_data, batch_idx, B
 
     # print("batch_idx: ",batch_idx, "query_in shape: ", np.shape(query_in))
     # print("batch_idx: ",batch_idx, "doc_neg_in shape: ", np.shape(doc_neg_in))
-    query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
-    doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
-    doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
-    query_len = len(query_in)
-    query_in = tf.sparse.to_dense(query_in)
-    doc_pos_in = tf.sparse.to_dense(doc_pos_in)
-    doc_neg_in = tf.sparse.to_dense(doc_neg_in)
+    # query_in = convert_sparse_matrix_to_sparse_tensor(query_in)
+    # doc_pos_in = convert_sparse_matrix_to_sparse_tensor(doc_pos_in)
+    # doc_neg_in = convert_sparse_matrix_to_sparse_tensor(doc_neg_in)
 
+    print("query_in type: ", type(query_in.indices), ", type: ", query_in.indices)
+    print("query_in shape: ", query_in._shape)
+    print("query_in values: ", query_in.data)
+    query_in_dense = tf.sparse_to_dense(query_in.indices, query_in._shape, query_in.data)
+    doc_pos_in = tf.sparse_to_dense(doc_pos_in.indices, doc_pos_in._shape, doc_pos_in.data)
+    doc_neg_in = tf.sparse_to_dense(doc_neg_in.indices, doc_neg_in._shape, doc_neg_in.data)
+    # query_in = tf.sparse.to_dense(query_in)
+    # doc_pos_in = tf.sparse.to_dense(doc_pos_in)
+    # doc_neg_in = tf.sparse.to_dense(doc_neg_in)
+    query_len = query_in_dense._shape[0]
     query_seq_len = [conf.max_seq_len] * query_len
     pos_seq_len = [conf.max_seq_len] * query_len
     neg_seq_len = [conf.max_seq_len] * query_len * conf.NEG
-    return {query_batch: query_in, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in, on_train_batch: on_training,
+    return {query_batch: query_in_dense, doc_pos_batch: doc_pos_in, doc_neg_batch: doc_neg_in, on_train_batch: on_training,
             query_seq_length: query_seq_len,
             neg_seq_length: neg_seq_len,
             pos_seq_length: pos_seq_len}

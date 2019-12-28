@@ -209,7 +209,7 @@ with tf.Session(config=config) as sess:
             sess.run(train_step, feed_dict=pull_batch_rnn(
                 True, query_train_dat, doc_train_dat,doc_neg_train_dat,
                 batch_id, query_BS, query_batch, doc_pos_batch,doc_neg_batch, on_train,
-                query_seq_length, neg_seq_length, pos_seq_length,
+                query_seq_length, neg_seq_length, pos_seq_length,TRIGRAM_D,
                 conf))
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
@@ -217,7 +217,7 @@ with tf.Session(config=config) as sess:
         epoch_auc = 0
         for i in range(train_epoch_steps):
 
-            loss_v = sess.run(loss, feed_dict=pull_batch_rnn(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_pos_batch, doc_neg_batch,on_train, query_seq_length, neg_seq_length, pos_seq_length,conf))
+            loss_v = sess.run(loss, feed_dict=pull_batch_rnn(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_pos_batch, doc_neg_batch,on_train, query_seq_length, neg_seq_length, pos_seq_length,TRIGRAM_D,conf))
             epoch_loss += loss_v
 
             # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
@@ -242,7 +242,7 @@ with tf.Session(config=config) as sess:
             # print("test batch_id:", batch_id,", i: ",i)
             loss_v = sess.run(loss, feed_dict=pull_batch_rnn(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
                                                          query_BS, query_batch, doc_pos_batch, doc_neg_batch,
-                                                         on_train, query_seq_length, neg_seq_length, pos_seq_length,conf))
+                                                         on_train, query_seq_length, neg_seq_length, pos_seq_length,TRIGRAM_D,conf))
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 
