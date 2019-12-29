@@ -27,10 +27,10 @@ L2_N = conf.L2_N
 # The part below shouldn't be commented for everyday training
 # utilize the CountVectorizer() object to transform the successfully-interacted bhv & ad words as raw vectors
 
-bhv_act, ad_act, ad_act_neg = get_data_set_comment(conf.file_train, conf)
+bhv_act, ad_act, ad_act_neg = get_data_set_comment_cut_words(conf.file_train, conf)
 # bhv_act, ad_act, ad_act_neg = utils.GetActDat_v2(conf.file_train)
 # exit(0)
-bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment(conf.file_vali, conf)
+bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment_cut_words(conf.file_vali, conf)
 # bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix

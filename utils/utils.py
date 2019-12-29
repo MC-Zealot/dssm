@@ -10,6 +10,8 @@ import random
 import math
 import sys
 import re
+import jieba
+import io
 
 # 配置文件
 # conf = Config()
@@ -414,7 +416,20 @@ def pre_process(line):
             line = line.replace(urls[index], "")
     line = re.sub(u"([^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u007a])", "", line)
     return line
-
+def pre_process_blank(line):
+    if line is None:
+        return line
+    #去掉两端空白
+    # line = line.strip()
+    #判断是否有短链，如果有则去掉
+    reg_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')  # 匹配模式
+    urls = re.findall(reg_pattern, line)
+    if len(urls) != 0:
+        line = line.replace(urls[0], "")
+        for index in range(len(urls)):
+            line = line.replace(urls[index], "")
+    #line = re.sub(u"([^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u007a])", "", line)
+    return line
 
 def get_data(file_path,conf):
     """
@@ -470,6 +485,86 @@ def convert_word2id(query, vocab_map, conf):
     ids = np.array(ids)
     return ids[:conf.max_seq_len]
 
+
+# 创建停用词list
+def stopwords_list(filepath):
+    stopwords = [line.strip() for line in io.open(filepath, 'r',encoding='utf-8').readlines()]
+    return stopwords
+
+
+#切词
+def cut_words(line,conf):
+    words = jieba.cut(line, cut_all=False)
+    # 去停用词
+    stopwords = stopwords_list(conf.stopwords_path)
+    # for key in words:
+    #      print key.word,key.flag
+    after_tingyongci_words = []
+    r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~]+'
+    for word in words:
+        word = re.sub(r, '', word).strip()
+        if word not in stopwords:
+            if word != '\t' and len(word)>0:
+                after_tingyongci_words.append(word)
+    return " ".join(after_tingyongci_words)
+
+
+def get_data_set_comment_cut_words(FileName, conf):
+    """
+    评论流数据
+1、查看query（正文博文）结构，字符串，句子每个字以空格为分隔符，uni gram
+2、查看doc（广告博文）正例与负例结构
+3、先计算正例（保持不变）
+4、再通过正例，随机选择NEG个当做负例。
+    :param FileName:
+    :return:query, doc, doc_neg
+    """
+    query = []
+    doc = []
+    doc_neg = []
+
+    with open(FileName, encoding='utf8') as f:
+        for line in f.readlines():
+
+            spline = line.split('\t')
+            if len(spline) < 3:
+                continue
+            prefix,  title, label, mid, feed_id = spline
+            if label != '1':
+                print("wrong label:", line)
+                continue
+
+            prefix = cut_words(prefix, conf)
+            title = cut_words(title, conf)
+            prefix = pre_process_blank(prefix)
+            title = pre_process_blank(title)
+            # prefix = [i for i in prefix]
+            # title = [i for i in title]
+            # prefix = " ".join(prefix)
+            # title = " ".join(title)
+
+            query.append(prefix)
+            doc.append(title)
+            # doc_neg.extend(cur_arr[:conf.NEG])
+    size = len(doc)
+    for i in range(size):
+        # print(doc[i])
+        j = 0
+        pos_content = doc[i]
+        doc_neg_list=[]#负样本NEG个
+        doc_neg_list=set(doc_neg_list)
+        while j < conf.NEG:
+            r = random.random()
+
+            r = int(r * size)
+            neg_content = doc[r] #随机选择NEG个负样本，如果和正样本ad相同，或者query相同，则pass
+            if pos_content != neg_content and query[i] != query[r] and neg_content not in doc_neg_list:
+                # doc_neg.append(neg_content)
+                doc_neg_list.add(neg_content)
+                j += 1
+        doc_neg.extend(doc_neg_list)
+
+    return query, doc, doc_neg
 
 if __name__ == '__main__':
     print("hello")

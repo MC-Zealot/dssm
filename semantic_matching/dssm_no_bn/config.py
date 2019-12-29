@@ -29,7 +29,7 @@ class Config(object):
         self.query_mid_vector_file = r'output/y_mid_vector.txt'
         self.doc_pos_y_mid_vector_file = r'output/doc_pos_y_mid_vector.txt'
         self.doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
-
+        self.stopwords_path = '../../data/stopwords.txt'
         self.to_string()
 
 
