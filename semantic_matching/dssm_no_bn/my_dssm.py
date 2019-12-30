@@ -34,7 +34,7 @@ bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment_cut_words(conf
 # bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
-vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
+vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b",min_df=5)
 vectorizer.fit(ad_act + bhv_act + ad_act_neg)
 save_vectorizer(vectorizer)
 
