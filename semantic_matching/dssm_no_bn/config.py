@@ -11,15 +11,15 @@ class Config(object):
 
     def __init__(self):
         self.vocab_path = '../../data/vocab.txt'
-        # self.file_train = '../../data/comment/trainset_repeat_20190508_20190514_shuffle.txt'
-        self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
-        self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
-        # self.file_vali = '../../data/comment/testset_repeat_20190515_20190515_shuffle.txt'
+        self.file_train = '../../data/comment/trainset_repeat_20190508_20190514_shuffle.txt'
+        #self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
+        #self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
+        self.file_vali = '../../data/comment/testset_repeat_20190515_20190515_shuffle.txt'
         self.L1_N = 1000
         self.L2_N = 300
-        self.query_BS = 512
-        self.learning_rate = 0.01
-        self.num_epoch = 10
+        self.query_BS = 256
+        self.learning_rate = 0.00001
+        self.num_epoch = 40
         self.summaries_dir = './Summaries/'
         self.gpu = 0
         # negative sample
