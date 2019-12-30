@@ -72,14 +72,11 @@ with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
     print ("TRIGRAM_D: ",TRIGRAM_D)
     #定义数据结构，类型、shape
-    # query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
-    # doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
-    # doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     query_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='query_batch')
-    # print ("query_batch shape: ",query_batch.shape)
     doc_positive_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_positive_batch')
     doc_negative_batch = tf.sparse_placeholder(tf.float32, shape=[None, TRIGRAM_D], name='doc_negative_batch')
     on_train = tf.placeholder(tf.bool, name='on_train')
+    keep_prob = tf.placeholder("float32", name='keep_prob')
 
 
 with tf.name_scope('FC1'):
@@ -92,13 +89,14 @@ with tf.name_scope('FC1'):
     query_l1 = tf.sparse_tensor_dense_matmul(query_batch, weight1) + bias1
     doc_positive_l1 = tf.sparse_tensor_dense_matmul(doc_positive_batch, weight1) + bias1
     doc_negative_l1 = tf.sparse_tensor_dense_matmul(doc_negative_batch, weight1) + bias1
-
-
-with tf.name_scope('BN1'):
-
     query_l1_out = tf.nn.relu(query_l1)
     doc_positive_l1_out = tf.nn.relu(doc_positive_l1)
     doc_negative_l1_out = tf.nn.relu(doc_negative_l1)
+
+with tf.name_scope('Drop_out'):
+    query_l1_out = tf.nn.dropout(query_l1, keep_prob)
+    doc_positive_l1_out = tf.nn.dropout(doc_positive_l1, keep_prob)
+    doc_negative_l1_out = tf.nn.dropout(doc_negative_l1, keep_prob)
 
 
 with tf.name_scope('FC2'):
@@ -113,11 +111,16 @@ with tf.name_scope('FC2'):
     doc_positive_l2 = tf.matmul(doc_positive_l1_out, weight2) + bias2
     doc_negative_l2 = tf.matmul(doc_negative_l1_out, weight2) + bias2
 
-
-with tf.name_scope('BN2'):
     query_y = tf.nn.relu(query_l2,name='embedding_query_y')
     doc_positive_y = tf.nn.relu(doc_positive_l2,name='embedding_doc_positive_y')
     doc_negative_y = tf.nn.relu(doc_negative_l2,name='embedding_doc_negative_y')
+
+
+with tf.name_scope('Drop_out2'):
+    query_y = tf.nn.dropout(query_y, keep_prob)
+    doc_positive_y = tf.nn.dropout(doc_positive_y, keep_prob)
+    doc_negative_y = tf.nn.dropout(doc_negative_y, keep_prob)
+
 
 with tf.name_scope('Merge_Negative_Doc'):
     #获取正样本
@@ -224,7 +227,7 @@ with tf.Session(config=config) as sess:
             # cos_s_r=sess.run(cos_sim_raw,feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train))
             # print("cos_sim_raw shape",cos_sim_raw.shape,"cos_sim_raw[0:12]: ",cos_s_r[0:10])
             # exit(0)
-            sess.run(train_step, feed_dict=pull_batch(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train, conf))
+            sess.run(train_step, feed_dict=pull_batch_drop_out(True, query_train_dat, doc_train_dat,doc_neg_train_dat, batch_id, query_BS, query_batch, doc_positive_batch,doc_negative_batch,on_train, conf, keep_prob,conf.keep_prob))
         end = time.time()
         # train loss下边是来计算损失，打印结果，不参与模型训练
         epoch_loss = 0
@@ -232,7 +235,7 @@ with tf.Session(config=config) as sess:
         for i in range(train_epoch_steps):
 
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, True, i))
-            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train, conf))
+            loss_v = sess.run(loss, feed_dict=pull_batch_drop_out(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train, conf, keep_prob,1))
             epoch_loss += loss_v
 
             # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
@@ -256,9 +259,9 @@ with tf.Session(config=config) as sess:
         for index in range(vali_epoch_steps):
             # print("test batch_id:", batch_id,", i: ",i)
             # loss_v = sess.run(loss, feed_dict=feed_dict(False, False, i))
-            loss_v = sess.run(loss, feed_dict=pull_batch(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
+            loss_v = sess.run(loss, feed_dict=pull_batch_drop_out(False, query_vali_dat, doc_vali_dat, doc_neg_vali_dat, index,
                                                          query_BS, query_batch, doc_positive_batch, doc_negative_batch,
-                                                         on_train, conf))
+                                                         on_train, conf, keep_prob,1.0))
             # print("test_loss epoch:", epoch, ", index: ", index,"loss_v: ",loss_v)
             epoch_loss += loss_v
 

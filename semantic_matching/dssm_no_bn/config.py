@@ -15,6 +15,7 @@ class Config(object):
         #self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
         #self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
         self.file_vali = '../../data/comment/testset_repeat_20190515_20190515_shuffle.txt'
+        self.vocab_size = 10000
         self.L1_N = 1000
         self.L2_N = 300
         self.query_BS = 256
@@ -31,6 +32,7 @@ class Config(object):
         self.doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
         self.stopwords_path = '../../data/stopwords.txt'
         self.to_string()
+        self.keep_prob = 0.8
 
 
 if __name__ == '__main__':
