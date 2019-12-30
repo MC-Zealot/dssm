@@ -11,7 +11,7 @@ class Config(object):
 
     def __init__(self):
         self.vocab_path = '../../data/vocab.txt'
-        self.vocab_size = 1000
+        self.vocab_size = 10000
         # self.file_train = '../../data/comment/trainset_repeat_20190508_20190514_shuffle.txt'
         self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
         self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'
@@ -32,6 +32,7 @@ class Config(object):
         self.doc_neg_y_mid_vector_file = r'output/doc_neg_y_mid_vector.txt'
         self.stopwords_path = '../../data/stopwords.txt'
         self.to_string()
+        self.keep_prob = 0.8
 
 
 if __name__ == '__main__':
