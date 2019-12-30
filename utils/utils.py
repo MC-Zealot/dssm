@@ -534,10 +534,12 @@ def get_data_set_comment_cut_words(FileName, conf):
                 print("wrong label:", line)
                 continue
 
-            prefix = cut_words(prefix, conf)
-            title = cut_words(title, conf)
             prefix = pre_process_blank(prefix)
             title = pre_process_blank(title)
+
+            prefix = cut_words(prefix, conf)
+            title = cut_words(title, conf)
+
             # prefix = [i for i in prefix]
             # title = [i for i in title]
             # prefix = " ".join(prefix)

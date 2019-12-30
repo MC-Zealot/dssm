@@ -34,7 +34,7 @@ bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment_cut_words(conf
 # bhv_act_test, ad_act_test, ad_act_neg_test  = utils.GetActDat_v2(conf.file_vali)
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
-vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b",min_df=5)
+vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b",max_features=conf.vocab_size)#
 vectorizer.fit(ad_act + bhv_act + ad_act_neg)
 save_vectorizer(vectorizer)
 
@@ -46,6 +46,8 @@ query_vali_dat = vectorizer.transform(bhv_act_test)
 doc_vali_dat = vectorizer.transform(ad_act_test)
 doc_neg_vali_dat = vectorizer.transform(ad_act_neg_test)
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
+features = vectorizer.get_feature_names()
+
 
 train_epoch_steps = int(query_train_dat.shape[0] / query_BS) - 1 # = number of samples / batch_size
 print ("train_epoch_steps:", train_epoch_steps)

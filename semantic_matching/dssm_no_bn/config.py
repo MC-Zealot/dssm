@@ -11,6 +11,7 @@ class Config(object):
 
     def __init__(self):
         self.vocab_path = '../../data/vocab.txt'
+        self.vocab_size = 1000
         # self.file_train = '../../data/comment/trainset_repeat_20190508_20190514_shuffle.txt'
         self.file_train = '../../data/dataset_20190508_20190514_2w.txt'
         self.file_vali = '../../data/dataset_vali_20190515_20190515_5k.txt'

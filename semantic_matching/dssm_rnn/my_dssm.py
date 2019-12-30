@@ -66,8 +66,6 @@ def variable_summaries(var, name):
         tf.summary.histogram(name, var)
 
 
-
-
 with tf.name_scope('input'):
     # 预测时只用输入query即可，将其embedding为向量。
     print ("TRIGRAM_D: ",TRIGRAM_D)
