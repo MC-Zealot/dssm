@@ -35,7 +35,8 @@ bhv_act_test, ad_act_test, ad_act_neg_test = get_data_set_comment_cut_words(conf
 print ("data_train['query'] len: ", np.shape(bhv_act))
 ## Establish Vectorizer and transform the raw word input into sparse matrix
 vectorizer = CountVectorizer(token_pattern=r"(?u)\b\w+\b",max_features=conf.vocab_size)#
-vectorizer.fit(ad_act + bhv_act + ad_act_neg)
+# vectorizer.fit(ad_act + bhv_act + ad_act_neg)
+vectorizer.fit(ad_act + bhv_act + ad_act_neg+ bhv_act_test)
 save_vectorizer(vectorizer)
 
 query_train_dat = vectorizer.transform(bhv_act)
@@ -165,7 +166,7 @@ with tf.name_scope('Loss'):
     prob = tf.nn.softmax(cos_sim)#1、输出一下结构，2、修改结构，变成n*1，当做out
     # 只取第一列，即正样本列概率。
     hit_prob = tf.slice(prob, [0, 0], [-1, 1])
-    loss = -tf.reduce_sum(tf.log(hit_prob)) / query_BS
+    loss = -tf.reduce_sum(tf.log(hit_prob + 1e-8)) / query_BS#防止nan。一般都是损失函数取对数出现0，或者分母为0，可以添加一个极小值
 
     # loss = -tf.reduce_sum(tf.log(tf.clip_by_value(hit_prob, 1e-8, 1.0)))#防止nan
 
