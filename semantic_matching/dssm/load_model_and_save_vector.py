@@ -1,6 +1,8 @@
-import utils
-from utils import *
+import sys
+sys.path.append("../..")
+from utils.utils import *
 
+from semantic_matching.dssm.config import Config
 # 读取数据
 conf = Config()
 sess = tf.Session()
@@ -8,10 +10,10 @@ sess = tf.Session()
 saver = tf.train.import_meta_graph('./model/model_1.ckpt.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./model'))
 
-vectorizer = utils.load_vectorizer()#字典
+vectorizer = load_vectorizer()#字典
 TRIGRAM_D = len(vectorizer.get_feature_names()) # 词库大小，aka 稀疏矩阵列数
 # query_test, doc_test, doc_neg_test = utils.GetActDat(conf.file_vali)
-query_test, doc_test, doc_neg_test = utils.get_data_set_comment(conf.file_vali)
+query_test, doc_test, doc_neg_test = get_data_set_comment(conf.file_vali,conf)
 query_test = query_test[:conf.query_BS]
 doc_test = doc_test[:conf.query_BS]
 doc_neg_test = doc_neg_test[:conf.query_BS * conf.NEG]
@@ -74,9 +76,9 @@ doc_pos_y = sess.run(doc_positive_y, feed_dict={
     query_batch_values: Bhv_in[1],
     query_batch_shape: Bhv_in[2],
 
-    doc_positive_batch_indices: Bhv_in[0],
-    doc_positive_batch_values: Bhv_in[1],
-    doc_positive_batch_shape: Bhv_in[2],
+    doc_positive_batch_indices: ad_in[0],
+    doc_positive_batch_values: ad_in[1],
+    doc_positive_batch_shape: ad_in[2],
 
     doc_negative_batch_indices: ad_neg_in[0],
     doc_negative_batch_values: ad_neg_in[1],
