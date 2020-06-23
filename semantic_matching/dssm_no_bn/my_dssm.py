@@ -167,7 +167,7 @@ with tf.name_scope('Loss'):
     # 只取第一列，即正样本列概率。
     hit_prob = tf.slice(prob, [0, 0], [-1, 1])
     loss = -tf.reduce_sum(tf.log(hit_prob + 1e-8)) / query_BS#防止nan。一般都是损失函数取对数出现0，或者分母为0，可以添加一个极小值
-
+    #在训练阶段，通过极大似然估计来最小化损失函数：
     # loss = -tf.reduce_sum(tf.log(tf.clip_by_value(hit_prob, 1e-8, 1.0)))#防止nan
 
     tf.summary.scalar('loss', loss)
@@ -181,14 +181,14 @@ with tf.name_scope('Accuracy'):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     tf.summary.scalar('accuracy', accuracy)
 
-# with tf.name_scope('Auc'):
-#     # insert by trobr
-#     indices = tf.squeeze(tf.where(tf.less_equal(label_tensor, 2 - 1)), 1)
-#     label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
-#     predictions = tf.gather(cos_sim_raw, indices)
-#     # end of insert
-#     auc_value, auc_op = tf.metrics.auc(label_tensor, predictions, num_thresholds=2000)
-#     tf.summary.scalar('auc', auc_value)
+with tf.name_scope('Auc'):
+    # insert by trobr
+    indices = tf.squeeze(tf.where(tf.less_equal(label_tensor, 2 - 1)), 1)
+    label_tensor = tf.cast(tf.gather(label_tensor, indices), tf.int32)
+    predictions = tf.gather(cos_sim_raw, indices)
+    # end of insert
+    auc_value, auc_op = tf.metrics.auc(label_tensor, predictions, num_thresholds=2000)
+    tf.summary.scalar('auc', auc_value)
 
 merged = tf.summary.merge_all()
 
@@ -237,7 +237,7 @@ with tf.Session(config=config) as sess:
             epoch_loss += loss_v
 
             # sess.run(auc_op, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
-            # auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
+            auc_v=sess.run(auc_value, feed_dict=pull_batch(False, query_train_dat, doc_train_dat,doc_neg_train_dat, i, query_BS, query_batch, doc_positive_batch, doc_negative_batch,on_train))
             # epoch_auc += auc_v
 
             # print("train_loss epoch:", epoch, ", i: ", i, "loss_v: ", loss_v)
